@@ -1,159 +1,168 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Heart } from "lucide-react";
-
-export default function WillYouMarryIsma() {
-  const [noPosition, setNoPosition] = useState({ top: 0, left: 0 });
-  const [yesClicked, setYesClicked] = useState(false);
-  const [confetti, setConfetti] = useState([]);
-
-  // Generate confetti safely (avoid window error)
-  useEffect(() => {
-    if (yesClicked) {
-      const pieces = Array.from({ length: 40 }).map(() => ({
-        left: Math.random() * 100,
-        duration: 3 + Math.random() * 2,
-        delay: Math.random() * 2,
-      }));
-      setConfetti(pieces);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Will You Marry Me Isma?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
     }
-  }, [yesClicked]);
 
-  // Romantic background music (safe autoplay after click)
-  useEffect(() => {
-    const audio = new Audio(
-      "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-love-11786.mp3"
-    );
-    audio.loop = true;
-    audio.volume = 0.4;
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+      background: url('https://images.unsplash.com/photo-1518199266791-5375a83190b7') no-repeat center center/cover;
+    }
 
-    const enableAudio = () => {
-      audio.play().catch(() => {});
-      window.removeEventListener("click", enableAudio);
-    };
+    .container {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 50px;
+      border-radius: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+    }
 
-    window.addEventListener("click", enableAudio);
+    h1 {
+      font-size: 3rem;
+      color: #e11d74;
+      margin-bottom: 20px;
+    }
 
-    return () => {
-      audio.pause();
-      window.removeEventListener("click", enableAudio);
-    };
-  }, []);
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+      color: #444;
+    }
 
-  const moveNoButton = () => {
-    const randomTop = Math.floor(Math.random() * 300) - 150;
-    const randomLeft = Math.floor(Math.random() * 300) - 150;
-    setNoPosition({ top: randomTop, left: randomLeft });
-  };
+    .buttons {
+      position: relative;
+      height: 120px;
+    }
 
-  if (yesClicked) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1518199266791-5375a83190b7')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* Confetti */}
-        {confetti.map((piece, i) => (
-          <motion.div
-            key={i}
-            initial={{ y: -100 }}
-            animate={{ y: "110vh" }}
-            transition={{
-              duration: piece.duration,
-              repeat: Infinity,
-              delay: piece.delay,
-            }}
-            className="absolute w-3 h-3 bg-pink-400 rounded-full"
-            style={{ left: `${piece.left}%` }}
-          />
-        ))}
+    button {
+      padding: 15px 35px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      position: absolute;
+      transition: 0.3s ease;
+    }
 
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 120 }}
-        >
-          <Card className="rounded-2xl shadow-2xl bg-white/90 backdrop-blur-md">
-            <CardContent className="p-12 text-center space-y-6">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-              >
-                <Heart className="w-20 h-20 mx-auto text-pink-500" />
-              </motion.div>
-              <h1 className="text-5xl font-extrabold text-pink-600">
-                ISMA SAID YES 💍✨
-              </h1>
-              <p className="text-xl text-gray-700">
-                This is the start of our forever, Isma ❤️
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-    );
-  }
+    #yesBtn {
+      background: #ec4899;
+      color: white;
+      left: 40%;
+    }
 
-  return (
-    <div
-      className="min-h-screen flex items-center justify-center p-6 overflow-hidden"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="text-center bg-white/70 backdrop-blur-md p-12 rounded-3xl shadow-2xl"
-      >
-        <motion.div
-          animate={{ y: [0, -15, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        >
-          <Heart className="w-16 h-16 mx-auto mb-6 text-pink-500" />
-        </motion.div>
+    #yesBtn:hover {
+      background: #db2777;
+      transform: scale(1.1);
+    }
 
-        <h1 className="text-6xl font-extrabold text-pink-600 mb-6">
-          Isma, Will You Marry Me? 💖
-        </h1>
-        <p className="text-xl text-gray-700 mb-10">
-          You are my today, my tomorrow, and my forever.
-        </p>
+    #noBtn {
+      background: #9ca3af;
+      color: white;
+      left: 60%;
+    }
 
-        <div className="relative flex items-center justify-center gap-10 h-40">
-          <Button
-            onClick={() => setYesClicked(true)}
-            className="text-xl px-10 py-7 rounded-2xl shadow-xl bg-pink-500 hover:bg-pink-600 text-white"
-          >
-            YES 💍
-          </Button>
+    .heart {
+      font-size: 4rem;
+      animation: float 2s infinite ease-in-out;
+      margin-bottom: 20px;
+    }
 
-          <motion.div
-            animate={{ x: noPosition.left, y: noPosition.top }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Button
-              onMouseEnter={moveNoButton}
-              className="text-xl px-10 py-7 rounded-2xl shadow-xl bg-gray-400 hover:bg-gray-500 text-white"
-            >
-              NO 😜
-            </Button>
-          </motion.div>
-        </div>
-      </motion.div>
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: pink;
+      top: -10px;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh);
+      }
+    }
+
+    .success {
+      font-size: 3rem;
+      color: #e11d74;
+      animation: pop 0.6s ease forwards;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="bgMusic" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-love-11786.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container" id="mainBox">
+    <div class="heart">💖</div>
+    <h1>Isma, Will You Marry Me?</h1>
+    <p>You are my today, my tomorrow, and my forever.</p>
+
+    <div class="buttons">
+      <button id="yesBtn">YES 💍</button>
+      <button id="noBtn">NO 😜</button>
     </div>
-  );
-}
+  </div>
+
+  <script>
+    const noBtn = document.getElementById('noBtn');
+    const yesBtn = document.getElementById('yesBtn');
+    const bgMusic = document.getElementById('bgMusic');
+    const mainBox = document.getElementById('mainBox');
+
+    // Enable music after first click
+    document.body.addEventListener('click', () => {
+      bgMusic.play().catch(() => {});
+    }, { once: true });
+
+    noBtn.addEventListener('mouseover', () => {
+      const x = Math.random() * (window.innerWidth - 100);
+      const y = Math.random() * (window.innerHeight - 50);
+      noBtn.style.left = x + 'px';
+      noBtn.style.top = y + 'px';
+    });
+
+    yesBtn.addEventListener('click', () => {
+      mainBox.innerHTML = "<div class='success'>ISMA SAID YES 💍✨<br><br>Our forever starts now ❤️</div>";
+      createConfetti();
+    });
+
+    function createConfetti() {
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(confetti);
+      }
+    }
+  </script>
+
+</body>
+</html>
