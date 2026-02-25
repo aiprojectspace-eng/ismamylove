@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Will You Marry Me Isma?</title>
+  <title>Isma Will You Marry Me?</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
   <style>
     * {
@@ -20,37 +20,39 @@
       align-items: center;
       text-align: center;
       overflow: hidden;
-      background: url('https://images.unsplash.com/photo-1518199266791-5375a83190b7') no-repeat center center/cover;
+      background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
     }
 
     .container {
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       padding: 50px;
       border-radius: 30px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-      backdrop-filter: blur(10px);
+      position: relative;
+      width: 90%;
+      max-width: 600px;
     }
 
     h1 {
-      font-size: 3rem;
+      font-size: 2.5rem;
       color: #e11d74;
       margin-bottom: 20px;
     }
 
     p {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       margin-bottom: 40px;
       color: #444;
     }
 
     .buttons {
       position: relative;
-      height: 120px;
+      height: 150px;
     }
 
     button {
       padding: 15px 35px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       border: none;
       border-radius: 50px;
       cursor: pointer;
@@ -61,50 +63,34 @@
     #yesBtn {
       background: #ec4899;
       color: white;
-      left: 40%;
-    }
-
-    #yesBtn:hover {
-      background: #db2777;
-      transform: scale(1.1);
+      left: 30%;
     }
 
     #noBtn {
-      background: #9ca3af;
+      background: #6b7280;
       color: white;
       left: 60%;
     }
 
-    .heart {
-      font-size: 4rem;
-      animation: float 2s infinite ease-in-out;
-      margin-bottom: 20px;
+    #noBtn:hover {
+      background: #4b5563;
     }
 
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
+    .sad {
+      font-size: 2rem;
+      color: #555;
+      animation: fadeIn 0.5s ease forwards;
     }
 
-    .confetti {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background: pink;
-      top: -10px;
-      animation: fall linear infinite;
-    }
-
-    @keyframes fall {
-      to {
-        transform: translateY(110vh);
-      }
-    }
-
-    .success {
-      font-size: 3rem;
+    .happy {
+      font-size: 2.5rem;
       color: #e11d74;
-      animation: pop 0.6s ease forwards;
+      animation: pop 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @keyframes pop {
@@ -115,53 +101,33 @@
 </head>
 <body>
 
-  <audio id="bgMusic" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-love-11786.mp3" type="audio/mpeg">
-  </audio>
-
   <div class="container" id="mainBox">
-    <div class="heart">💖</div>
-    <h1>Isma, Will You Marry Me?</h1>
+    <h1>Isma, Will You Marry Me? 💍</h1>
     <p>You are my today, my tomorrow, and my forever.</p>
 
     <div class="buttons">
-      <button id="yesBtn">YES 💍</button>
-      <button id="noBtn">NO 😜</button>
+      <button id="yesBtn">YES 💖</button>
+      <button id="noBtn">NO 😢</button>
     </div>
   </div>
 
   <script>
-    const noBtn = document.getElementById('noBtn');
     const yesBtn = document.getElementById('yesBtn');
-    const bgMusic = document.getElementById('bgMusic');
+    const noBtn = document.getElementById('noBtn');
     const mainBox = document.getElementById('mainBox');
 
-    // Enable music after first click
-    document.body.addEventListener('click', () => {
-      bgMusic.play().catch(() => {});
-    }, { once: true });
-
-    noBtn.addEventListener('mouseover', () => {
-      const x = Math.random() * (window.innerWidth - 100);
-      const y = Math.random() * (window.innerHeight - 50);
-      noBtn.style.left = x + 'px';
-      noBtn.style.top = y + 'px';
+    // YES button runs away
+    yesBtn.addEventListener('mouseover', () => {
+      const x = Math.random() * (window.innerWidth - 150);
+      const y = Math.random() * (window.innerHeight - 80);
+      yesBtn.style.left = x + 'px';
+      yesBtn.style.top = y + 'px';
     });
 
-    yesBtn.addEventListener('click', () => {
-      mainBox.innerHTML = "<div class='success'>ISMA SAID YES 💍✨<br><br>Our forever starts now ❤️</div>";
-      createConfetti();
+    // NO button click becomes sad
+    noBtn.addEventListener('click', () => {
+      mainBox.innerHTML = "<div class='sad'>Oh no... 💔<br><br>You just broke my heart 😭</div>";
     });
-
-    function createConfetti() {
-      for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.classList.add('confetti');
-        confetti.style.left = Math.random() * 100 + 'vw';
-        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-        document.body.appendChild(confetti);
-      }
-    }
   </script>
 
 </body>
