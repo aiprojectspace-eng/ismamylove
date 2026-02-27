@@ -6,28 +6,53 @@
 <title>Buletin Utama</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, Helvetica, sans-serif;}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
 
 body{
-  background:radial-gradient(circle at top,#0d1b2a,#000814);
+  background:linear-gradient(135deg,#001219,#001d3d,#000814);
   color:white;
   overflow:hidden;
 }
 
-/* TOP BAR */
+/* ===== BREAKING INTRO OVERLAY ===== */
+.intro{
+  position:fixed;
+  inset:0;
+  background:#c1121f;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:32px;
+  font-weight:bold;
+  letter-spacing:3px;
+  animation:introFade 3s forwards;
+  z-index:9999;
+}
+
+@keyframes introFade{
+  0%{opacity:1;}
+  80%{opacity:1;}
+  100%{opacity:0;visibility:hidden;}
+}
+
+/* ===== TOP BAR ===== */
 .topbar{
   background:#001d3d;
-  padding:12px 30px;
+  padding:12px 15px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   border-bottom:3px solid #ffc300;
+  font-size:14px;
 }
 
 .brand{
-  font-size:20px;
   font-weight:bold;
-  letter-spacing:1px;
 }
 
 .brand span{
@@ -36,10 +61,10 @@ body{
 
 .live{
   background:red;
-  padding:4px 10px;
-  font-size:12px;
+  padding:3px 8px;
+  font-size:10px;
   font-weight:bold;
-  border-radius:4px;
+  border-radius:3px;
   animation:blink 1s infinite;
 }
 
@@ -49,91 +74,72 @@ body{
 }
 
 .clock{
-  font-size:13px;
-  opacity:0.9;
+  font-size:11px;
+  opacity:0.8;
 }
 
-/* LAYOUT */
+/* ===== CONTENT ===== */
 .wrapper{
-  display:grid;
-  grid-template-columns:2.2fr 1fr;
-  height:80vh;
-}
-
-.main{
-  padding:50px;
-  position:relative;
+  padding:20px;
+  overflow-y:auto;
+  height:85vh;
 }
 
 .segment{
-  font-size:14px;
+  font-size:12px;
   color:#ffc300;
-  margin-bottom:10px;
+  margin-bottom:8px;
   letter-spacing:1px;
 }
 
-.main h1{
-  font-size:32px;
-  line-height:1.3;
-  margin-bottom:20px;
+h1{
+  font-size:22px;
+  line-height:1.4;
+  margin-bottom:15px;
 }
 
-.main p{
-  font-size:18px;
-  opacity:0.85;
-  margin-bottom:20px;
-}
-
-.main img{
-  width:100%;
-  max-width:550px;
-  height:330px;
-  object-fit:cover;
-  border-radius:4px;
-}
-
-/* LOWER THIRD */
-.lower-third{
-  position:absolute;
-  bottom:30px;
-  left:50px;
-  background:#001d3d;
-  padding:15px 20px;
-  width:60%;
-  border-left:6px solid #ffc300;
-}
-
-.lower-third h3{
+p{
   font-size:15px;
-  margin-bottom:5px;
+  opacity:0.9;
+  margin-bottom:15px;
 }
 
-.lower-third span{
-  font-size:12px;
-  opacity:0.7;
-}
-
-/* SIDEBAR */
-.sidebar{
-  background:#000c1a;
-  padding:30px;
-  border-left:2px solid rgba(255,255,255,0.1);
-}
-
-.sidebar h3{
-  font-size:16px;
+img{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  border-radius:5px;
   margin-bottom:20px;
-  border-bottom:1px solid rgba(255,255,255,0.2);
-  padding-bottom:10px;
 }
 
-.side-item{
+/* ===== LOWER THIRD ===== */
+.lower-third{
+  background:#001d3d;
+  padding:10px;
+  border-left:4px solid #ffc300;
+  font-size:12px;
+  margin-bottom:20px;
+}
+
+/* ===== SIDEBAR NEWS STYLE LIST ===== */
+.other-news{
+  margin-top:10px;
+  border-top:1px solid rgba(255,255,255,0.2);
+  padding-top:15px;
+}
+
+.other-news h3{
   font-size:14px;
-  margin-bottom:18px;
+  margin-bottom:10px;
+}
+
+.other-item{
+  font-size:13px;
+  margin-bottom:8px;
   opacity:0.85;
 }
 
-/* TICKER */
+/* ===== TICKER ===== */
 .ticker{
   position:fixed;
   bottom:0;
@@ -141,12 +147,13 @@ body{
   background:#c1121f;
   overflow:hidden;
   white-space:nowrap;
+  font-size:12px;
 }
 
 .ticker span{
   display:inline-block;
-  padding:12px 0;
-  animation:scroll 22s linear infinite;
+  padding:10px 0;
+  animation:scroll 20s linear infinite;
 }
 
 @keyframes scroll{
@@ -154,17 +161,20 @@ body{
   to{transform:translateX(-100%);}
 }
 
-/* REVEAL */
+/* ===== REVEAL ===== */
 .reveal{
-  font-size:30px;
+  font-size:20px;
   text-align:center;
-  margin-top:150px;
+  margin-top:40px;
   color:#ffc300;
+  line-height:1.6;
 }
 </style>
 </head>
 
 <body>
+
+<div class="intro">BREAKING NEWS</div>
 
 <div class="topbar">
   <div class="brand">TV<span>3</span> Buletin Utama</div>
@@ -172,36 +182,31 @@ body{
   <div class="clock" id="clock"></div>
 </div>
 
-<div class="wrapper">
+<div class="wrapper" id="content">
 
-  <div class="main" id="content">
+  <div class="segment">LAPORAN KHAS</div>
 
-    <div class="segment">LAPORAN KHAS</div>
+  <h1>Wanita Tempatan Disahkan Berkahwin Dengan Lelaki Bertuah Dalam Majlis Tertutup</h1>
 
-    <h1>Wanita Tempatan Disahkan Berkahwin Dengan Lelaki Bertuah Dalam Majlis Tertutup</h1>
+  <p>
+    Sumber terdekat memaklumkan pasangan tersebut dilihat sangat bahagia dan 
+    sentiasa menunjukkan rasa hormat serta kasih sayang antara satu sama lain.
+  </p>
 
-    <p>
-      Sumber terdekat memaklumkan pasangan tersebut dilihat sangat bahagia dan 
-      sering menunjukkan sikap saling menghargai antara satu sama lain.
-    </p>
+  <!-- TUKAR GAMBAR NI -->
+  <img src="isma.jpg" alt="Pasangan">
 
-    <img src="isma.jpg" alt="Pasangan">
-
-    <div class="lower-third">
-      <h3>ISMA</h3>
-      <span>Isteri | Kampung Kubur</span>
-    </div>
-
+  <div class="lower-third">
+    <strong>ISMA</strong><br>
+    Isteri | Kampung Kubur
   </div>
 
-  <div class="sidebar">
+  <div class="other-news">
     <h3>BERITA LAIN</h3>
-
-    <div class="side-item">Kerajaan umum inisiatif baharu bantu rakyat.</div>
-    <div class="side-item">Cuaca panas dijangka berterusan minggu ini.</div>
-    <div class="side-item">Indeks pasaran ditutup tinggi hari ini.</div>
-    <div class="side-item">Pakar nasihat pasangan kekalkan komunikasi sihat.</div>
-
+    <div class="other-item">Kerajaan umum inisiatif baharu bantu rakyat.</div>
+    <div class="other-item">Cuaca panas dijangka berlarutan minggu ini.</div>
+    <div class="other-item">Indeks pasaran ditutup tinggi hari ini.</div>
+    <div class="other-item">Pakar nasihat pasangan kekalkan komunikasi sihat.</div>
   </div>
 
 </div>
@@ -209,7 +214,7 @@ body{
 <div class="ticker">
   <span>
   TERKINI: Pasangan ini dilaporkan sangat romantik dan bahagia • 
-  Sumber sahih mengesahkan lelaki tersebut amat bersyukur setiap hari • 
+  Lelaki tersebut amat bersyukur setiap hari • 
   Hubungan ini dijangka kekal sehingga akhir hayat • 
   Orang ramai mendoakan kebahagiaan pasangan tersebut •
   </span>
@@ -226,8 +231,8 @@ updateClock();
 
 setTimeout(()=>{
   document.getElementById("content").innerHTML=
-  "<div class='reveal'>Lelaki bertuah itu adalah saya ❤️<br><br>Dan wanita itu adalah awak 💖<br><br>Saya sayang awak selamanya.</div>";
-},10000);
+  "<div class='reveal'>Lelaki bertuah itu adalah saya ❤️<br><br>Dan wanita luar biasa itu adalah awak 💖<br><br>Saya sayang awak sampai bila-bila.</div>";
+},12000);
 </script>
 
 </body>
