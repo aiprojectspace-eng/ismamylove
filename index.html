@@ -1,18 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Breaking News</title>
+<title>Buletin Utama</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins',sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 
 body{
   background:#0f172a;
@@ -20,19 +15,18 @@ body{
   overflow:hidden;
 }
 
-.top-bar{
-  background:#b91c1c;
-  padding:10px 20px;
+.top{
+  background:#c1121f;
+  padding:12px 20px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   font-weight:bold;
-  letter-spacing:1px;
 }
 
 .live{
   background:red;
-  padding:5px 12px;
+  padding:6px 14px;
   border-radius:20px;
   animation:blink 1s infinite;
 }
@@ -42,45 +36,72 @@ body{
   50%{opacity:0.3;}
 }
 
+.clock{
+  font-size:0.9rem;
+  opacity:0.9;
+}
+
 .main{
+  display:flex;
+  height:75vh;
+  padding:30px;
+  gap:30px;
+}
+
+.left{
+  flex:1;
   display:flex;
   flex-direction:column;
   justify-content:center;
+}
+
+.right{
+  flex:1;
+  display:flex;
+  justify-content:center;
   align-items:center;
-  height:80vh;
-  text-align:center;
-  padding:20px;
 }
 
 h1{
-  font-size:3rem;
+  font-size:2.8rem;
   margin-bottom:20px;
-  animation:fadeIn 1s ease forwards;
 }
 
 p{
-  font-size:1.3rem;
-  opacity:0.8;
+  font-size:1.2rem;
+  opacity:0.85;
 }
 
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(20px);}
-  to{opacity:1;transform:translateY(0);}
+img{
+  width:100%;
+  max-width:400px;
+  border-radius:15px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.5);
+}
+
+.label{
+  position:absolute;
+  top:120px;
+  right:40px;
+  background:#e63946;
+  padding:8px 15px;
+  font-weight:bold;
+  border-radius:5px;
 }
 
 .ticker{
   position:fixed;
   bottom:0;
   width:100%;
-  background:#dc2626;
+  background:#d00000;
   overflow:hidden;
   white-space:nowrap;
 }
 
-.ticker-text{
+.ticker span{
   display:inline-block;
   padding:15px 0;
-  animation:scroll 15s linear infinite;
+  animation:scroll 18s linear infinite;
 }
 
 @keyframes scroll{
@@ -90,7 +111,8 @@ p{
 
 .sweet{
   font-size:2.5rem;
-  color:#f472b6;
+  color:#ff8fab;
+  text-align:center;
   animation:pop 0.8s ease forwards;
 }
 
@@ -103,27 +125,51 @@ p{
 
 <body>
 
-<div class="top-bar">
+<div class="top">
   <div>BREAKING NEWS</div>
   <div class="live">LIVE</div>
+  <div class="clock" id="clock"></div>
 </div>
+
+<div class="label">EKSKLUSIF</div>
 
 <div class="main" id="content">
-  <h1>Wanita Paling Comel di Malaysia Disahkan Sudah Berkahwin 😱</h1>
-  <p>Laporan khas menyatakan lelaki paling bertuah telah berjaya memilikinya...</p>
-</div>
-
-<div class="ticker">
-  <div class="ticker-text">
-    🔴 Terkini: Wanita paling cantik dan manja di Malaysia kini milik seorang lelaki yang sangat handsome • Sumber sahih mengesahkan pasangan ini sangat sweet • Orang ramai cemburu tahap maksimum 🔴
+  <div class="left">
+    <h1>Wanita Paling Cantik di Malaysia Sah Milik Seorang Lelaki Bertuah 😱</h1>
+    <p>Sumber dalaman mengesahkan lelaki tersebut sangat handsome, penyayang dan tidak pernah kalah bila gaduh kecil.</p>
+  </div>
+  <div class="right">
+    <!-- Tukar gambar ni dengan gambar kau berdua -->
+    <img src="isma.jpg" alt="Couple">
   </div>
 </div>
 
+<div class="ticker">
+  <span>
+  🔴 Terkini: Wanita paling manja dan comel telah selamat berkahwin • Orang ramai cemburu tahap maksimum • Lelaki tersebut dilaporkan sangat bertuah dan bersyukur setiap hari • Hubungan ini disahkan sah sehingga akhir hayat 🔴
+  </span>
+</div>
+
+<audio id="newsSound" autoplay>
+  <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3" type="audio/mpeg">
+</audio>
+
 <script>
+// Jam real-time
+function updateClock(){
+  const now = new Date();
+  document.getElementById("clock").innerHTML =
+  now.toLocaleDateString("ms-MY") + " | " +
+  now.toLocaleTimeString("ms-MY");
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// Tukar jadi sweet message lepas 6 saat
 setTimeout(()=>{
   document.getElementById("content").innerHTML =
-  "<div class='sweet'>Tahniah kepada saya kerana berjaya memiliki awak ❤️<br><br>Saya cinta awak selamanya 💖</div>";
-},4000);
+  "<div class='sweet'>Lelaki bertuah itu adalah saya ❤️<br><br>Dan wanita luar biasa itu adalah awak 😘<br><br>Saya sayang awak sampai bila-bila 💖</div>";
+},6000);
 </script>
 
 </body>
