@@ -1,134 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Isma Will You Marry Me?</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breaking News</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
 
-    body {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      overflow: hidden;
-      background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
-    }
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
 
-    .container {
-      background: rgba(255, 255, 255, 0.9);
-      padding: 50px;
-      border-radius: 30px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-      position: relative;
-      width: 90%;
-      max-width: 600px;
-    }
+body{
+  background:#0f172a;
+  color:white;
+  overflow:hidden;
+}
 
-    h1 {
-      font-size: 2.5rem;
-      color: #e11d74;
-      margin-bottom: 20px;
-    }
+.top-bar{
+  background:#b91c1c;
+  padding:10px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-weight:bold;
+  letter-spacing:1px;
+}
 
-    p {
-      font-size: 1.1rem;
-      margin-bottom: 40px;
-      color: #444;
-    }
+.live{
+  background:red;
+  padding:5px 12px;
+  border-radius:20px;
+  animation:blink 1s infinite;
+}
 
-    .buttons {
-      position: relative;
-      height: 150px;
-    }
+@keyframes blink{
+  0%,100%{opacity:1;}
+  50%{opacity:0.3;}
+}
 
-    button {
-      padding: 15px 35px;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      position: absolute;
-      transition: 0.3s ease;
-    }
+.main{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  height:80vh;
+  text-align:center;
+  padding:20px;
+}
 
-    #yesBtn {
-      background: #ec4899;
-      color: white;
-      left: 30%;
-    }
+h1{
+  font-size:3rem;
+  margin-bottom:20px;
+  animation:fadeIn 1s ease forwards;
+}
 
-    #noBtn {
-      background: #6b7280;
-      color: white;
-      left: 60%;
-    }
+p{
+  font-size:1.3rem;
+  opacity:0.8;
+}
 
-    #noBtn:hover {
-      background: #4b5563;
-    }
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
 
-    .sad {
-      font-size: 2rem;
-      color: #555;
-      animation: fadeIn 0.5s ease forwards;
-    }
+.ticker{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#dc2626;
+  overflow:hidden;
+  white-space:nowrap;
+}
 
-    .happy {
-      font-size: 2.5rem;
-      color: #e11d74;
-      animation: pop 0.5s ease forwards;
-    }
+.ticker-text{
+  display:inline-block;
+  padding:15px 0;
+  animation:scroll 15s linear infinite;
+}
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
+@keyframes scroll{
+  from{transform:translateX(100%);}
+  to{transform:translateX(-100%);}
+}
 
-    @keyframes pop {
-      from { transform: scale(0); }
-      to { transform: scale(1); }
-    }
-  </style>
+.sweet{
+  font-size:2.5rem;
+  color:#f472b6;
+  animation:pop 0.8s ease forwards;
+}
+
+@keyframes pop{
+  from{transform:scale(0);}
+  to{transform:scale(1);}
+}
+</style>
 </head>
+
 <body>
 
-  <div class="container" id="mainBox">
-    <h1>Isma, Will You Marry Me? 💍</h1>
-    <p>You are my today, my tomorrow, and my forever.</p>
+<div class="top-bar">
+  <div>BREAKING NEWS</div>
+  <div class="live">LIVE</div>
+</div>
 
-    <div class="buttons">
-      <button id="yesBtn">YES 💖</button>
-      <button id="noBtn">NO 😢</button>
-    </div>
+<div class="main" id="content">
+  <h1>Wanita Paling Comel di Malaysia Disahkan Sudah Berkahwin 😱</h1>
+  <p>Laporan khas menyatakan lelaki paling bertuah telah berjaya memilikinya...</p>
+</div>
+
+<div class="ticker">
+  <div class="ticker-text">
+    🔴 Terkini: Wanita paling cantik dan manja di Malaysia kini milik seorang lelaki yang sangat handsome • Sumber sahih mengesahkan pasangan ini sangat sweet • Orang ramai cemburu tahap maksimum 🔴
   </div>
+</div>
 
-  <script>
-    const yesBtn = document.getElementById('yesBtn');
-    const noBtn = document.getElementById('noBtn');
-    const mainBox = document.getElementById('mainBox');
-
-    // YES button runs away
-    yesBtn.addEventListener('mouseover', () => {
-      const x = Math.random() * (window.innerWidth - 150);
-      const y = Math.random() * (window.innerHeight - 80);
-      yesBtn.style.left = x + 'px';
-      yesBtn.style.top = y + 'px';
-    });
-
-    // NO button click becomes sad
-    noBtn.addEventListener('click', () => {
-      mainBox.innerHTML = "<div class='sad'>Oh no... 💔<br><br>You just broke my heart 😭</div>";
-    });
-  </script>
+<script>
+setTimeout(()=>{
+  document.getElementById("content").innerHTML =
+  "<div class='sweet'>Tahniah kepada saya kerana berjaya memiliki awak ❤️<br><br>Saya cinta awak selamanya 💖</div>";
+},4000);
+</script>
 
 </body>
 </html>
