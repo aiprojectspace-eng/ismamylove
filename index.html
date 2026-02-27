@@ -4,33 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buletin Utama</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{background:#0b1d3a;color:white;overflow:hidden;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial, Helvetica, sans-serif;}
 
+body{
+  background:radial-gradient(circle at top,#0d1b2a,#000814);
+  color:white;
+  overflow:hidden;
+}
+
+/* TOP BAR */
 .topbar{
-  background:linear-gradient(to right,#001f54,#003566);
-  padding:10px 20px;
+  background:#001d3d;
+  padding:12px 30px;
   display:flex;
   justify-content:space-between;
   align-items:center;
+  border-bottom:3px solid #ffc300;
 }
 
-.logo{
-  font-weight:900;
-  font-size:1.5rem;
-  letter-spacing:2px;
+.brand{
+  font-size:20px;
+  font-weight:bold;
+  letter-spacing:1px;
 }
 
-.logo span{color:#ffcc00;}
+.brand span{
+  color:#ffc300;
+}
 
 .live{
   background:red;
-  padding:5px 12px;
-  border-radius:20px;
-  font-size:0.8rem;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:bold;
+  border-radius:4px;
   animation:blink 1s infinite;
 }
 
@@ -39,79 +48,92 @@ body{background:#0b1d3a;color:white;overflow:hidden;}
   50%{opacity:0.4;}
 }
 
-.clock{font-size:0.9rem;opacity:0.8;}
+.clock{
+  font-size:13px;
+  opacity:0.9;
+}
 
-.container{
+/* LAYOUT */
+.wrapper{
   display:grid;
-  grid-template-columns:2fr 1fr;
-  height:75vh;
+  grid-template-columns:2.2fr 1fr;
+  height:80vh;
 }
 
 .main{
-  padding:40px;
+  padding:50px;
   position:relative;
 }
 
+.segment{
+  font-size:14px;
+  color:#ffc300;
+  margin-bottom:10px;
+  letter-spacing:1px;
+}
+
 .main h1{
-  font-size:2.5rem;
+  font-size:32px;
+  line-height:1.3;
   margin-bottom:20px;
 }
 
 .main p{
-  font-size:1.2rem;
-  opacity:0.9;
+  font-size:18px;
+  opacity:0.85;
+  margin-bottom:20px;
 }
 
-.image-box{
-  margin-top:20px;
-}
-
-.image-box img{
+.main img{
   width:100%;
-  max-width:500px;
-  height:350px;
+  max-width:550px;
+  height:330px;
   object-fit:cover;
-  border-radius:10px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.6);
+  border-radius:4px;
 }
 
+/* LOWER THIRD */
 .lower-third{
   position:absolute;
-  bottom:20px;
-  left:40px;
-  background:#003566;
+  bottom:30px;
+  left:50px;
+  background:#001d3d;
   padding:15px 20px;
-  border-left:5px solid #ffcc00;
+  width:60%;
+  border-left:6px solid #ffc300;
 }
 
-.lower-third h3{font-size:1rem;}
-.lower-third p{font-size:0.8rem;opacity:0.8;}
+.lower-third h3{
+  font-size:15px;
+  margin-bottom:5px;
+}
 
+.lower-third span{
+  font-size:12px;
+  opacity:0.7;
+}
+
+/* SIDEBAR */
 .sidebar{
-  background:#001233;
-  padding:20px;
+  background:#000c1a;
+  padding:30px;
   border-left:2px solid rgba(255,255,255,0.1);
 }
 
 .sidebar h3{
-  margin-bottom:15px;
-  color:#ffcc00;
-}
-
-.news-item{
+  font-size:16px;
   margin-bottom:20px;
-  font-size:0.9rem;
-  opacity:0.9;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  padding-bottom:10px;
 }
 
-.weather{
-  background:#002855;
-  padding:15px;
-  border-radius:10px;
-  margin-top:20px;
-  text-align:center;
+.side-item{
+  font-size:14px;
+  margin-bottom:18px;
+  opacity:0.85;
 }
 
+/* TICKER */
 .ticker{
   position:fixed;
   bottom:0;
@@ -124,7 +146,7 @@ body{background:#0b1d3a;color:white;overflow:hidden;}
 .ticker span{
   display:inline-block;
   padding:12px 0;
-  animation:scroll 20s linear infinite;
+  animation:scroll 22s linear infinite;
 }
 
 @keyframes scroll{
@@ -132,15 +154,12 @@ body{background:#0b1d3a;color:white;overflow:hidden;}
   to{transform:translateX(-100%);}
 }
 
+/* REVEAL */
 .reveal{
-  font-size:2.3rem;
-  color:#ffcc00;
-  animation:fade 1s ease forwards;
-}
-
-@keyframes fade{
-  from{opacity:0;transform:scale(0.9);}
-  to{opacity:1;transform:scale(1);}
+  font-size:30px;
+  text-align:center;
+  margin-top:150px;
+  color:#ffc300;
 }
 </style>
 </head>
@@ -148,59 +167,51 @@ body{background:#0b1d3a;color:white;overflow:hidden;}
 <body>
 
 <div class="topbar">
-  <div class="logo">TV<span>3</span> HD</div>
+  <div class="brand">TV<span>3</span> Buletin Utama</div>
   <div class="live">LIVE</div>
   <div class="clock" id="clock"></div>
 </div>
 
-<div class="container">
+<div class="wrapper">
 
-  <div class="main" id="mainContent">
-    <h1>Wanita Paling Cantik di Malaysia Sah Milik Seorang Lelaki Bertuah 😱</h1>
-    <p>Sumber dalaman melaporkan lelaki tersebut sangat penyayang, rajin bekerja dan sering mengalah dalam perbalahan kecil.</p>
+  <div class="main" id="content">
 
-    <div class="image-box">
-      <!-- TUKAR GAMBAR SINI -->
-      <img src="isma.jpg" alt="Pasangan">
-    </div>
+    <div class="segment">LAPORAN KHAS</div>
+
+    <h1>Wanita Tempatan Disahkan Berkahwin Dengan Lelaki Bertuah Dalam Majlis Tertutup</h1>
+
+    <p>
+      Sumber terdekat memaklumkan pasangan tersebut dilihat sangat bahagia dan 
+      sering menunjukkan sikap saling menghargai antara satu sama lain.
+    </p>
+
+    <img src="isma.jpg" alt="Pasangan">
 
     <div class="lower-third">
-      <h3>ISMA - Isteri Paling Sweet Malaysia</h3>
-      <p>Laporan Khas | Kampung Kubur</p>
+      <h3>ISMA</h3>
+      <span>Isteri | Kampung Kubur</span>
     </div>
+
   </div>
 
   <div class="sidebar">
     <h3>BERITA LAIN</h3>
 
-    <div class="news-item">
-      🔹 Harga ayam kekal stabil minggu ini
-    </div>
+    <div class="side-item">Kerajaan umum inisiatif baharu bantu rakyat.</div>
+    <div class="side-item">Cuaca panas dijangka berterusan minggu ini.</div>
+    <div class="side-item">Indeks pasaran ditutup tinggi hari ini.</div>
+    <div class="side-item">Pakar nasihat pasangan kekalkan komunikasi sihat.</div>
 
-    <div class="news-item">
-      🔹 Cuaca panas dijangka berlarutan sehingga hujung bulan
-    </div>
-
-    <div class="news-item">
-      🔹 Lelaki misteri dilihat tersenyum setiap kali melihat isterinya
-    </div>
-
-    <div class="news-item">
-      🔹 Pasangan ini dilaporkan sangat romantik walaupun sudah lama berkahwin
-    </div>
-
-    <div class="weather">
-      🌤 Cuaca Hari Ini<br>
-      32°C | Cerah<br>
-      Lokasi: Malaysia
-    </div>
   </div>
 
 </div>
 
 <div class="ticker">
   <span>
-  🔴 TERKINI: Wanita paling cantik Malaysia sah menjadi milik lelaki paling bertuah • Orang ramai cemburu tahap kritikal • Hubungan ini disahkan sah sehingga akhir hayat • Sumber mengesahkan pasangan ini sangat sweet 🔴
+  TERKINI: Pasangan ini dilaporkan sangat romantik dan bahagia • 
+  Sumber sahih mengesahkan lelaki tersebut amat bersyukur setiap hari • 
+  Hubungan ini dijangka kekal sehingga akhir hayat • 
+  Orang ramai mendoakan kebahagiaan pasangan tersebut •
   </span>
 </div>
 
@@ -214,9 +225,9 @@ setInterval(updateClock,1000);
 updateClock();
 
 setTimeout(()=>{
-  document.getElementById("mainContent").innerHTML=
-  "<div class='reveal'>Lelaki bertuah itu adalah saya ❤️<br><br>Dan wanita luar biasa itu adalah awak 💖<br><br>Saya sayang awak sampai bila-bila 😘</div>";
-},8000);
+  document.getElementById("content").innerHTML=
+  "<div class='reveal'>Lelaki bertuah itu adalah saya ❤️<br><br>Dan wanita itu adalah awak 💖<br><br>Saya sayang awak selamanya.</div>";
+},10000);
 </script>
 
 </body>
