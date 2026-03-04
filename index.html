@@ -6,62 +6,30 @@
     <title>Saga BLM: Birthday Sprint!</title>
     <style>
         body { 
-            margin: 0; 
-            overflow: hidden; 
-            background: #0f0f0f; 
-            font-family: 'Segoe UI', sans-serif; 
-            touch-action: none; 
-            color: white;
+            margin: 0; overflow: hidden; background: #0f0f0f; 
+            font-family: 'Segoe UI', sans-serif; touch-action: none; color: white;
         }
-
-        canvas { 
-            display: block; 
-            background: #1a1a1a; 
-            margin: 0 auto; 
-            box-shadow: 0 0 50px rgba(255, 71, 87, 0.2); 
-        }
-        
+        canvas { display: block; background: #1a1a1a; margin: 0 auto; }
         #ui { 
-            position: absolute; 
-            top: 25px; 
-            width: 100%; 
-            text-align: center; 
-            font-size: 32px; 
-            font-weight: 900; 
-            pointer-events: none; 
-            color: #fff;
-            text-shadow: 0 0 10px #ff4757, 0 0 20px #ff4757;
-            z-index: 5;
+            position: absolute; top: 25px; width: 100%; text-align: center; 
+            font-size: 32px; font-weight: 900; pointer-events: none; color: #fff;
+            text-shadow: 0 0 10px #ff4757; z-index: 5;
         }
-
         #overlay { 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; height: 100%; 
-            background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(50,0,20,0.9) 100%);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center; 
-            z-index: 10; backdrop-filter: blur(8px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 10;
         }
-
         .message-panel {
-            background: rgba(255,255,255,0.05);
-            padding: 40px 20px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 71, 87, 0.4);
-            max-width: 85%;
-            text-align: center;
+            background: rgba(255,255,255,0.05); padding: 40px 20px;
+            border-radius: 30px; border: 1px solid rgba(255, 71, 87, 0.4);
+            max-width: 85%; text-align: center;
         }
-
         .btn { 
             padding: 18px 45px; font-size: 20px; cursor: pointer; 
             background: #ff4757; color: white; border: none; 
             border-radius: 50px; margin-top: 30px; font-weight: bold;
-            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
-            text-transform: uppercase;
         }
-
-        h1 { font-size: 2.2rem; margin: 0 0 15px 0; color: #ff4757; text-shadow: 0 0 10px rgba(255,71,87,0.5); }
-        p { font-size: 1.1rem; line-height: 1.5; color: #eee; margin: 0; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -71,20 +39,21 @@
 
     <div id="overlay">
         <div class="message-panel">
-            <h1 id="msg-title">Saga BLM Sprint 🏎️</h1>
+            <h1 style="color:#ff4757">Saga BLM Sprint 🏎️</h1>
             <p id="msg-p">Elak <b>STRESS</b> 💢<br>Kutip 10 <b>LOVE</b> ❤️<br><br>Guna tap <b>KIRI/KANAN</b></p>
-            <button class="btn" onclick="startGame()">Mula Enjin</button>
+            <button class="btn" id="startBtn">Mula Enjin</button>
         </div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
     <script>
+        // Deklarasi semua variable kat atas supaya global
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
         const overlay = document.getElementById('overlay');
-        const msgTitle = document.getElementById('msg-title');
+        const startBtn = document.getElementById('startBtn');
         const msgP = document.getElementById('msg-p');
 
         let gameRunning = false;
@@ -115,6 +84,7 @@
         window.addEventListener('resize', resize);
         resize();
 
+        // Game Controls
         window.addEventListener('touchstart', (e) => {
             if (!gameRunning) return;
             const touchX = e.touches[0].clientX;
@@ -129,4 +99,103 @@
         function spawnItem() {
             const lane = Math.floor(Math.random() * 3);
             const isLove = Math.random() > 0.4; 
-            items.push({
+            items.push({ lane, y: -100, type: isLove ? '❤️' : '💢', isGood: isLove });
+        }
+
+        // FUNGSI UTAMA
+        function startGame() {
+            console.log("Game Starting...");
+            score = 0;
+            items = [];
+            speed = 6;
+            gameRunning = true;
+            overlay.classList.add('hidden');
+            scoreEl.innerText = score;
+            animate();
+        }
+
+        function winGame() {
+            gameRunning = false;
+            overlay.classList.remove('hidden');
+            document.querySelector('h1').innerHTML = "HAPPY BIRTHDAY SAYANG! 🎂";
+            msgP.innerHTML = "Saga Silver ni berjaya bawa cinta saya kat awak!<br><br>I love you so much! ❤️🌹";
+            startBtn.innerText = "Main Lagi";
+        }
+
+        // Attach event listener guna JavaScript (lebih selamat dari onclick HTML)
+        startBtn.addEventListener('click', startGame);
+
+        function drawRoad() {
+            const w = canvas.width;
+            const h = canvas.height;
+            const laneW = w / 3;
+            roadOffset += speed;
+            if (roadOffset > 100) roadOffset = 0;
+
+            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.setLineDash([40, 60]);
+            ctx.beginPath();
+            ctx.moveTo(laneW, roadOffset - 100); ctx.lineTo(laneW, h + 100);
+            ctx.moveTo(2*laneW, roadOffset - 100); ctx.lineTo(2*laneW, h + 100);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.strokeStyle = "#ff4757";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(2, 0); ctx.lineTo(2, h);
+            ctx.moveTo(w-2, 0); ctx.lineTo(w-2, h);
+            ctx.stroke();
+        }
+
+        function animate() {
+            if (!gameRunning) return;
+            
+            ctx.save();
+            if (shakeTime > 0) {
+                ctx.translate(Math.random() * 5 - 2.5, Math.random() * 5 - 2.5);
+                shakeTime--;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (score > 4) speed = 8;
+            if (score > 8) speed = 11;
+
+            drawRoad();
+
+            if (carImg.complete) {
+                ctx.drawImage(carImg, car.x, car.y, car.w, car.h);
+            }
+
+            if (frame % Math.max(30, 50 - score) === 0) spawnItem();
+
+            for (let i = items.length - 1; i >= 0; i--) {
+                let it = items[i];
+                it.y += speed;
+                let itemX = (it.lane * (canvas.width/3)) + (canvas.width/6);
+                ctx.font = "45px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(it.type, itemX, it.y);
+
+                if (it.y > car.y && it.y < car.y + car.h && it.lane === car.lane) {
+                    if (it.isGood) {
+                        score++;
+                        scoreEl.innerText = score;
+                        shakeTime = 10; 
+                        if (score >= 10) winGame();
+                    } else {
+                        score = Math.max(0, score - 1);
+                        scoreEl.innerText = score;
+                        if (navigator.vibrate) navigator.vibrate(100);
+                    }
+                    items.splice(i, 1);
+                }
+                if (it.y > canvas.height + 50) items.splice(i, 1);
+            }
+            ctx.restore();
+            frame++;
+            requestAnimationFrame(animate);
+        }
+    </script>
+</body>
+</html>
