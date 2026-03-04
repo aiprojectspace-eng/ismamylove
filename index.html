@@ -3,39 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti RPG</title>
+<title>Ismayanti Ultimate Fight</title>
 
 <style>
 body{
 margin:0;
 overflow:hidden;
-background:#000;
+background:black;
 touch-action:none;
 font-family:Arial;
 }
 
 canvas{
 display:block;
-width:100vw;
-height:100vh;
 }
 
-/* ATTACK BUTTON */
 #attackBtn{
 position:absolute;
 right:30px;
 bottom:40px;
-width:90px;
-height:90px;
+width:100px;
+height:100px;
 border-radius:50%;
 border:none;
-background:#ff4da6;
+background:red;
 color:white;
 font-size:18px;
 font-weight:bold;
 }
 
-/* HP UI */
 .ui{
 position:absolute;
 top:20px;
@@ -45,7 +41,7 @@ color:white;
 
 .bar{
 width:250px;
-height:18px;
+height:20px;
 background:red;
 margin-bottom:10px;
 }
@@ -60,14 +56,14 @@ width:100%;
 <body>
 
 <div class="ui">
-<div>PLAYER HP</div>
+<div>PLAYER</div>
 <div class="bar"><div id="playerHP" class="bar-inner"></div></div>
 
-<div>DRAGON HP</div>
-<div class="bar"><div id="dragonHP" class="bar-inner"></div></div>
+<div>ENEMY</div>
+<div class="bar"><div id="enemyHP" class="bar-inner"></div></div>
 </div>
 
-<button id="attackBtn">⚔️</button>
+<button id="attackBtn">⚔</button>
 
 <canvas id="game"></canvas>
 
@@ -80,7 +76,33 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 /* ===================== */
-/* LOAD IMAGES */
+/* GAME OBJECTS */
+/* ===================== */
+
+const player = {
+x:100,
+y:canvas.height - 250,
+width:180,
+height:180,
+hp:100,
+state:"idle",
+cooldown:0,
+facing:1
+};
+
+const enemy = {
+x:canvas.width - 300,
+y:canvas.height - 300,
+width:200,
+height:200,
+hp:100,
+state:"idle",
+cooldown:0,
+facing:-1
+};
+
+/* ===================== */
+/* LOAD SPRITE SHEETS */
 /* ===================== */
 
 function loadImage(src){
@@ -89,46 +111,14 @@ img.src = src;
 return img;
 }
 
-const background = loadImage("./background.png");
-const heroImg = loadImage("./hero.png");
-const dragonImg = loadImage("./dragon.png");
-const treeImg = loadImage("./tree.png");
+/*
+👉 Upload sprite sheet later:
+player.png
+enemy.png
+*/
 
-/* ===================== */
-/* GAME OBJECTS */
-/* ===================== */
-
-const player = {
-x:100,
-y:canvas.height - 250,
-width:150,
-height:150,
-hp:100,
-speed:5,
-cooldown:0
-};
-
-const dragon = {
-x:canvas.width - 350,
-y:canvas.height - 350,
-width:200,
-height:200,
-hp:100,
-speed:2,
-direction:-1,
-cooldown:0
-};
-
-let bullets = [];
-let trees = [];
-
-/* Spawn trees */
-for(let i=0;i<6;i++){
-trees.push({
-x: Math.random() * canvas.width,
-y: canvas.height - 220
-});
-}
+const playerSprite = loadImage("player.png");
+const enemySprite = loadImage("enemy.png");
 
 /* ===================== */
 /* CONTROLS */
@@ -144,96 +134,92 @@ window.addEventListener("keyup",(e)=>{
 keys[e.key] = false;
 });
 
-/* Touch move */
-canvas.addEventListener("touchmove",(e)=>{
-let touch = e.touches[0];
-player.x = touch.clientX - player.width/2;
-});
-
-/* Attack */
 document.getElementById("attackBtn")
 .addEventListener("touchstart",()=>{
-shoot();
+attack();
 });
 
-function shoot(){
+/* ===================== */
+/* COMBAT SYSTEM */
+/* ===================== */
+
+function attack(){
+
 if(player.cooldown > 0) return;
 
-bullets.push({
-x:player.x + player.width,
-y:player.y + 50,
-speed:10
-});
+player.state = "attack";
+player.cooldown = 30;
 
-player.cooldown = 20;
+/* Hit detection */
+if(Math.abs(player.x - enemy.x) < 200){
+
+enemy.hp -= 15;
+enemy.state = "hit";
+
+if(enemy.hp <= 0){
+enemy.hp = 0;
+enemy.state = "dead";
+}
+}
+
 }
 
 /* ===================== */
-/* UPDATE LOGIC */
+/* UPDATE */
 /* ===================== */
 
 function update(){
 
-/* Player movement */
-if(keys["a"] || keys["ArrowLeft"]){
-player.x -= player.speed;
+/* Movement */
+if(keys["a"]){
+player.x -= 5;
+player.state = "walk";
+player.facing = -1;
 }
 
-if(keys["d"] || keys["ArrowRight"]){
-player.x += player.speed;
+if(keys["d"]){
+player.x += 5;
+player.state = "walk";
+player.facing = 1;
+}
+
+if(!keys["a"] && !keys["d"] && player.state !== "attack"){
+player.state = "idle";
 }
 
 /* Cooldown */
 if(player.cooldown > 0)
 player.cooldown--;
 
-/* Dragon AI */
-dragon.x += dragon.speed * dragon.direction;
+/* Enemy AI */
+if(enemy.hp > 0){
 
-if(dragon.x < canvas.width/2 || dragon.x > canvas.width - 200){
-dragon.direction *= -1;
+enemy.x += enemy.facing * 2;
+
+if(enemy.x < canvas.width/2 || enemy.x > canvas.width - 200){
+enemy.facing *= -1;
 }
 
-if(dragon.cooldown > 0)
-dragon.cooldown--;
-
-/* Dragon Attack */
-if(dragon.cooldown <= 0){
-if(Math.abs(player.x - dragon.x) < 250){
+if(Math.abs(enemy.x - player.x) < 150 && enemy.cooldown <= 0){
 player.hp -= 5;
-dragon.cooldown = 60;
-}
+enemy.cooldown = 60;
+enemy.state = "attack";
 }
 
-/* Bullet collision */
-bullets.forEach((b,index)=>{
-b.x += b.speed;
+if(enemy.cooldown > 0)
+enemy.cooldown--;
 
-if(
-b.x > dragon.x &&
-b.x < dragon.x + dragon.width &&
-b.y > dragon.y &&
-b.y < dragon.y + dragon.height
-){
-dragon.hp -= 10;
-bullets.splice(index,1);
-
-if(dragon.hp <= 0){
-dragon.hp = 0;
-setTimeout(()=>winScreen(),500);
 }
-}
-});
 
 /* Player death */
 if(player.hp <= 0){
-loseScreen();
+player.state = "dead";
 }
 
 }
 
 /* ===================== */
-/* DRAW */
+/* DRAW (ANIMATION ENGINE) */
 /* ===================== */
 
 function draw(){
@@ -241,36 +227,32 @@ function draw(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
 /* Background */
-ctx.drawImage(background,0,0,canvas.width,canvas.height);
+ctx.fillStyle="#1a1a2e";
+ctx.fillRect(0,0,canvas.width,canvas.height);
 
-/* Trees */
-trees.forEach(tree=>{
-ctx.drawImage(treeImg,tree.x,tree.y,150,150);
-});
+/* DRAW PLAYER */
+ctx.save();
+ctx.translate(player.x,player.y);
+ctx.scale(player.facing,1);
 
-/* Player */
-ctx.drawImage(player.hp > 0 ? heroImg : heroImg,
-player.x,player.y,player.width,player.height);
+ctx.drawImage(playerSprite, -player.width/2, -player.height/2, player.width, player.height);
 
-/* Dragon */
-if(dragon.hp > 0){
-ctx.drawImage(dragonImg,dragon.x,dragon.y,dragon.width,dragon.height);
+ctx.restore();
+
+/* DRAW ENEMY */
+if(enemy.hp > 0){
+ctx.save();
+ctx.translate(enemy.x,enemy.y);
+ctx.scale(enemy.facing,1);
+
+ctx.drawImage(enemySprite, -enemy.width/2, -enemy.height/2, enemy.width, enemy.height);
+
+ctx.restore();
 }
 
-/* Bullets */
-ctx.fillStyle="yellow";
-bullets.forEach(b=>{
-ctx.beginPath();
-ctx.arc(b.x,b.y,8,0,Math.PI*2);
-ctx.fill();
-});
-
-/* HP UI */
-document.getElementById("playerHP")
-.style.width = player.hp + "%";
-
-document.getElementById("dragonHP")
-.style.width = dragon.hp + "%";
+/* HP BAR */
+document.getElementById("playerHP").style.width = player.hp + "%";
+document.getElementById("enemyHP").style.width = enemy.hp + "%";
 
 }
 
@@ -286,28 +268,6 @@ requestAnimationFrame(loop);
 
 loop();
 
-/* ===================== */
-/* END SCREEN */
-/* ===================== */
-
-function winScreen(){
-document.body.innerHTML = `
-<div style="color:white;text-align:center;margin-top:200px;">
-<h1>🐉 Dragon Defeated!</h1>
-<h2>Happy Birthday ❤️</h2>
-</div>
-`;
-}
-
-function loseScreen(){
-document.body.innerHTML = `
-<div style="color:red;text-align:center;margin-top:200px;">
-<h1>You Died 💀</h1>
-</div>
-`;
-}
-
 </script>
-
 </body>
 </html>
