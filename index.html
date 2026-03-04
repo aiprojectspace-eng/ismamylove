@@ -3,38 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti RPG 2D Improved</title>
+<title>Ismayanti Visual RPG</title>
 
 <style>
 body{
 margin:0;
 overflow:hidden;
-background:#0f0f1a;
+background:#111;
 touch-action:none;
-font-family:Arial;
-color:white;
 }
 
 canvas{
 display:block;
-}
-
-#ui{
-position:absolute;
-top:20px;
-left:20px;
-}
-
-.bar{
-width:250px;
-height:18px;
-background:red;
-margin-bottom:10px;
-}
-
-.bar-inner{
-height:100%;
-background:lime;
 }
 
 #attackBtn{
@@ -54,16 +34,7 @@ font-weight:bold;
 </head>
 <body>
 
-<div id="ui">
-<div>PLAYER HP</div>
-<div class="bar"><div id="playerHP" class="bar-inner"></div></div>
-
-<div>DRAGON HP</div>
-<div class="bar"><div id="dragonHP" class="bar-inner"></div></div>
-</div>
-
 <button id="attackBtn">⚔️</button>
-
 <canvas id="game"></canvas>
 
 <script>
@@ -75,139 +46,84 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 /* ================= */
+/* LOAD IMAGES */
+/* ================= */
+
+const bg = new Image();
+bg.src = "background.png";
+
+const heroImg = new Image();
+heroImg.src = "hero.png";
+
+const dragonImg = new Image();
+dragonImg.src = "dragon.png";
+
+const treeImg = new Image();
+treeImg.src = "tree.png";
+
+/* ================= */
 /* GAME OBJECTS */
 /* ================= */
 
-const player = {
+let hero = {
 x:100,
-y:canvas.height-200,
-width:60,
-height:80,
-hp:100,
-speed:4,
-attackCooldown:0
+y:canvas.height - 250,
+width:150,
+height:150,
+hp:100
 };
 
-const dragon = {
-x:canvas.width-200,
-y:canvas.height-250,
-width:120,
-height:120,
-hp:100,
-speed:2,
-attackCooldown:0
+let dragon = {
+x:canvas.width - 300,
+y:canvas.height - 300,
+width:200,
+height:200,
+hp:100
 };
 
-let bullets = [];
+let trees = [];
+
+/* Spawn trees random */
+for(let i=0;i<5;i++){
+trees.push({
+x: Math.random() * canvas.width,
+y: canvas.height - 250
+});
+}
 
 /* ================= */
-/* CONTROLS */
-/* ================= */
-
-let keys = {};
-
-window.addEventListener("keydown",e=>{
-keys[e.key] = true;
-});
-
-window.addEventListener("keyup",e=>{
-keys[e.key] = false;
-});
-
 /* TOUCH MOVE */
+/* ================= */
+
 canvas.addEventListener("touchmove",(e)=>{
 let touch = e.touches[0];
-player.x = touch.clientX - player.width/2;
+hero.x = touch.clientX - hero.width/2;
 });
 
-/* ATTACK BUTTON */
+/* ================= */
+/* ATTACK */
+/* ================= */
+
 document.getElementById("attackBtn")
 .addEventListener("touchstart",()=>{
-shoot();
+attack();
 });
 
-/* ================= */
-/* COMBAT */
-/* ================= */
+function attack(){
+let dx = hero.x - dragon.x;
 
-function shoot(){
-if(player.attackCooldown > 0) return;
-
-bullets.push({
-x:player.x + player.width,
-y:player.y + 30,
-speed:10
-});
-
-player.attackCooldown = 20;
-}
-
-/* Dragon attack */
-function dragonAttack(){
-if(dragon.attackCooldown > 0) return;
-
-if(Math.abs(player.x - dragon.x) < 200){
-
-player.hp -= 10;
-dragon.attackCooldown = 60;
-}
-}
-
-/* ================= */
-/* UPDATE LOGIC */
-/* ================= */
-
-function update(){
-
-/* Player movement */
-if(keys["a"]) player.x -= player.speed;
-if(keys["d"]) player.x += player.speed;
-
-if(player.attackCooldown > 0)
-player.attackCooldown--;
-
-/* Dragon AI movement */
-dragon.x += dragon.speed;
-
-if(dragon.x > canvas.width - 100 || dragon.x < canvas.width/2){
-dragon.speed *= -1;
-}
-
-/* Dragon attack timer */
-if(dragon.attackCooldown > 0)
-dragon.attackCooldown--;
-
-dragonAttack();
-
-/* Bullet collision */
-bullets.forEach((b,index)=>{
-b.x += b.speed;
-
-/* Collision */
-if(
-b.x > dragon.x &&
-b.x < dragon.x + dragon.width &&
-b.y > dragon.y &&
-b.y < dragon.y + dragon.height
-){
-dragon.hp -= 10;
-bullets.splice(index,1);
+if(Math.abs(dx) < 200){
+dragon.hp -= 20;
 
 if(dragon.hp <= 0){
 dragon.hp = 0;
 setTimeout(()=>winScreen(),500);
 }
 }
-});
-
-/* Player death */
-if(player.hp <= 0){
-loseScreen();
-}
 }
 
 /* ================= */
-/* DRAW */
+/* DRAW FUNCTION */
 /* ================= */
 
 function draw(){
@@ -215,33 +131,34 @@ function draw(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
 /* Background */
-ctx.fillStyle="#1a1a2e";
-ctx.fillRect(0,0,canvas.width,canvas.height);
+ctx.drawImage(bg,0,0,canvas.width,canvas.height);
 
-/* Player */
-ctx.fillStyle="#ff66cc";
-ctx.fillRect(player.x,player.y,player.width,player.height);
+/* Trees */
+trees.forEach(tree=>{
+ctx.drawImage(treeImg,tree.x,tree.y,150,150);
+});
+
+/* Hero */
+ctx.drawImage(heroImg,hero.x,hero.y,hero.width,hero.height);
 
 /* Dragon */
 if(dragon.hp > 0){
-ctx.fillStyle="#9933ff";
-ctx.fillRect(dragon.x,dragon.y,dragon.width,dragon.height);
+ctx.drawImage(dragonImg,dragon.x,dragon.y,dragon.width,dragon.height);
+
+/* Dragon HP Bar */
+ctx.fillStyle="red";
+ctx.fillRect(dragon.x,dragon.y-20,200,10);
+
+ctx.fillStyle="lime";
+ctx.fillRect(dragon.x,dragon.y-20,dragon.hp/100*200,10);
 }
 
-/* Bullets */
-ctx.fillStyle="yellow";
-bullets.forEach(b=>{
-ctx.beginPath();
-ctx.arc(b.x,b.y,8,0,Math.PI*2);
-ctx.fill();
-});
+/* Hero HP */
+ctx.fillStyle="red";
+ctx.fillRect(20,20,200,15);
+ctx.fillStyle="lime";
+ctx.fillRect(20,20,hero.hp/100*200,15);
 
-/* UI Bars */
-document.getElementById("playerHP")
-.style.width = player.hp + "%";
-
-document.getElementById("dragonHP")
-.style.width = dragon.hp + "%";
 }
 
 /* ================= */
@@ -249,7 +166,6 @@ document.getElementById("dragonHP")
 /* ================= */
 
 function loop(){
-update();
 draw();
 requestAnimationFrame(loop);
 }
@@ -257,26 +173,18 @@ requestAnimationFrame(loop);
 loop();
 
 /* ================= */
-/* WIN / LOSE SCREEN */
+/* WIN SCREEN */
 /* ================= */
 
 function winScreen(){
-document.body.innerHTML = `
-<div style="text-align:center;margin-top:200px;">
-<h1>🐉 Dragon Defeated!</h1>
-<h2>Happy Birthday Ismayanti ❤️</h2>
-<p>You protected your kingdom.</p>
-</div>
-`;
-}
 
-function loseScreen(){
 document.body.innerHTML = `
-<div style="text-align:center;margin-top:200px;color:red;">
-<h1>💀 You Died</h1>
-<p>Try again warrior.</p>
+<div style="color:white;text-align:center;margin-top:200px;">
+<h1>🐉 Dragon Defeated!</h1>
+<h2>Happy Birthday ❤️</h2>
 </div>
 `;
+
 }
 
 </script>
