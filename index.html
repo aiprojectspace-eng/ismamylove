@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti Ultimate Fight</title>
+<title>Ultimate Chibi Fight</title>
 
 <style>
 body{
 margin:0;
 overflow:hidden;
-background:black;
+background:#000;
 touch-action:none;
 font-family:Arial;
 }
@@ -28,7 +28,7 @@ border-radius:50%;
 border:none;
 background:red;
 color:white;
-font-size:18px;
+font-size:20px;
 font-weight:bold;
 }
 
@@ -75,15 +75,33 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-/* ===================== */
-/* GAME OBJECTS */
-/* ===================== */
+/* ================= */
+/* LOAD SPRITE */
+/* ================= */
+
+const sprite = new Image();
+sprite.src = "player.png";
+
+/*
+ASSUMPTION:
+Sprite sheet grid = 4 columns
+Frame size = 256 x 256
+*/
+
+const frameWidth = 256;
+const frameHeight = 256;
+
+let frameX = 0;
+let frameY = 0;
+let frameTimer = 0;
+
+/* ================= */
+/* PLAYER DATA */
+/* ================= */
 
 const player = {
-x:100,
-y:canvas.height - 250,
-width:180,
-height:180,
+x:150,
+y:canvas.height-300,
 hp:100,
 state:"idle",
 cooldown:0,
@@ -91,40 +109,18 @@ facing:1
 };
 
 const enemy = {
-x:canvas.width - 300,
-y:canvas.height - 300,
-width:200,
-height:200,
+x:canvas.width-300,
+y:canvas.height-300,
 hp:100,
-state:"idle",
-cooldown:0,
-facing:-1
+speed:2,
+direction:-1
 };
 
-/* ===================== */
-/* LOAD SPRITE SHEETS */
-/* ===================== */
-
-function loadImage(src){
-let img = new Image();
-img.src = src;
-return img;
-}
-
-/*
-👉 Upload sprite sheet later:
-player.png
-enemy.png
-*/
-
-const playerSprite = loadImage("player.png");
-const enemySprite = loadImage("enemy.png");
-
-/* ===================== */
-/* CONTROLS */
-/* ===================== */
-
 let keys = {};
+
+/* ================= */
+/* CONTROLS */
+/* ================= */
 
 window.addEventListener("keydown",(e)=>{
 keys[e.key] = true;
@@ -139,9 +135,9 @@ document.getElementById("attackBtn")
 attack();
 });
 
-/* ===================== */
-/* COMBAT SYSTEM */
-/* ===================== */
+/* ================= */
+/* ATTACK SYSTEM */
+/* ================= */
 
 function attack(){
 
@@ -150,23 +146,18 @@ if(player.cooldown > 0) return;
 player.state = "attack";
 player.cooldown = 30;
 
-/* Hit detection */
-if(Math.abs(player.x - enemy.x) < 200){
-
-enemy.hp -= 15;
-enemy.state = "hit";
-
+if(Math.abs(player.x - enemy.x) < 250){
+enemy.hp -= 10;
 if(enemy.hp <= 0){
 enemy.hp = 0;
 enemy.state = "dead";
 }
 }
-
 }
 
-/* ===================== */
+/* ================= */
 /* UPDATE */
-/* ===================== */
+/* ================= */
 
 function update(){
 
@@ -192,73 +183,105 @@ if(player.cooldown > 0)
 player.cooldown--;
 
 /* Enemy AI */
-if(enemy.hp > 0){
-
-enemy.x += enemy.facing * 2;
+enemy.x += enemy.speed * enemy.direction;
 
 if(enemy.x < canvas.width/2 || enemy.x > canvas.width - 200){
-enemy.facing *= -1;
+enemy.direction *= -1;
 }
 
-if(Math.abs(enemy.x - player.x) < 150 && enemy.cooldown <= 0){
-player.hp -= 5;
-enemy.cooldown = 60;
-enemy.state = "attack";
+/* Enemy Attack */
+if(Math.abs(enemy.x - player.x) < 200){
+player.hp -= 0.05;
 }
 
-if(enemy.cooldown > 0)
-enemy.cooldown--;
-
-}
-
-/* Player death */
 if(player.hp <= 0){
+player.hp = 0;
 player.state = "dead";
 }
 
 }
 
-/* ===================== */
-/* DRAW (ANIMATION ENGINE) */
-/* ===================== */
+/* ================= */
+/* ANIMATION SYSTEM */
+/* ================= */
 
-function draw(){
+function animateSprite(state){
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
+/*
+Frame Layout:
+Row 0 = idle
+Row 1 = walk
+Row 2 = attack
+Row 3 = dead
+*/
 
-/* Background */
-ctx.fillStyle="#1a1a2e";
-ctx.fillRect(0,0,canvas.width,canvas.height);
+if(state === "idle") frameY = 0;
+if(state === "walk") frameY = 1;
+if(state === "attack") frameY = 2;
+if(state === "dead") frameY = 3;
 
-/* DRAW PLAYER */
+/* Frame animation */
+frameTimer++;
+
+if(frameTimer > 10){
+frameX++;
+frameTimer = 0;
+}
+
+/* Loop 4 columns */
+if(frameX > 3){
+frameX = 0;
+}
+
 ctx.save();
 ctx.translate(player.x,player.y);
 ctx.scale(player.facing,1);
 
-ctx.drawImage(playerSprite, -player.width/2, -player.height/2, player.width, player.height);
+ctx.drawImage(
+sprite,
+frameX * frameWidth,
+frameY * frameHeight,
+frameWidth,
+frameHeight,
+-frameWidth/2,
+-frameHeight/2,
+frameWidth,
+frameHeight
+);
 
 ctx.restore();
 
-/* DRAW ENEMY */
-if(enemy.hp > 0){
-ctx.save();
-ctx.translate(enemy.x,enemy.y);
-ctx.scale(enemy.facing,1);
-
-ctx.drawImage(enemySprite, -enemy.width/2, -enemy.height/2, enemy.width, enemy.height);
-
-ctx.restore();
 }
 
-/* HP BAR */
-document.getElementById("playerHP").style.width = player.hp + "%";
-document.getElementById("enemyHP").style.width = enemy.hp + "%";
+/* ================= */
+/* DRAW */
+/* ================= */
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.fillStyle="#1a1a1a";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+/* Draw Player Animation */
+animateSprite(player.state);
+
+/* Draw Enemy */
+ctx.fillStyle="purple";
+ctx.fillRect(enemy.x,enemy.y,150,150);
+
+/* HP UI */
+document.getElementById("playerHP")
+.style.width = player.hp + "%";
+
+document.getElementById("enemyHP")
+.style.width = enemy.hp + "%";
 
 }
 
-/* ===================== */
-/* GAME LOOP */
-/* ===================== */
+/* ================= */
+/* LOOP */
+/* ================= */
 
 function loop(){
 update();
@@ -269,5 +292,6 @@ requestAnimationFrame(loop);
 loop();
 
 </script>
+
 </body>
 </html>
