@@ -17,7 +17,6 @@ canvas{
 display:block;
 }
 
-/* JOYSTICK */
 #joy{
 position:absolute;
 left:30px;
@@ -28,7 +27,6 @@ border-radius:50%;
 background:rgba(255,255,255,0.2);
 }
 
-/* ATTACK BUTTON */
 #attack{
 position:absolute;
 right:30px;
@@ -49,10 +47,11 @@ font-weight:bold;
 <div id="joy"></div>
 <button id="attack">⚔️</button>
 
-<script type="module">
+<!-- ✅ THREE FROM CDN (NO MODULE ERROR) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160/examples/js/loaders/GLTFLoader.js"></script>
 
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
-import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/loaders/GLTFLoader.js";
+<script>
 
 /* ===================== */
 /* BASIC SETUP */
@@ -96,7 +95,7 @@ camera.position.set(0,5,12);
 /* LOAD MODELS */
 /* ===================== */
 
-const loader = new GLTFLoader();
+const loader = new THREE.GLTFLoader();
 
 let hero = null;
 let dragon = null;
@@ -112,10 +111,6 @@ if(child.isMesh) child.castShadow = true;
 });
 
 scene.add(hero);
-},
-undefined,
-(error)=>{
-console.error("Hero load error:",error);
 });
 
 /* DRAGON */
@@ -129,13 +124,9 @@ if(child.isMesh) child.castShadow = true;
 });
 
 scene.add(dragon);
-},
-undefined,
-(error)=>{
-console.error("Dragon load error:",error);
 });
 
-/* ENVIRONMENT OPTIONAL */
+/* ENV OPTIONAL */
 loader.load("./environment.glb",(glb)=>{
 let env = glb.scene;
 env.scale.set(5,5,5);
@@ -178,7 +169,7 @@ alert("🐉 Dragon Defeated!");
 });
 
 /* ===================== */
-/* GAME LOOP */
+/* LOOP */
 /* ===================== */
 
 function animate(){
@@ -198,7 +189,7 @@ renderer.render(scene,camera);
 
 animate();
 
-/* RESIZE FIX */
+/* RESIZE */
 
 window.addEventListener("resize",()=>{
 camera.aspect = window.innerWidth/window.innerHeight;
