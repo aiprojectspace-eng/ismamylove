@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ismayanti 3D Birthday Quest</title>
 <style>
-body { margin:0; overflow:hidden; }
-#attackBtn{
+body{margin:0;overflow:hidden;background:black;}
+#attack{
  position:absolute;
  right:20px;
  bottom:30px;
@@ -15,124 +15,137 @@ body { margin:0; overflow:hidden; }
  border-radius:50%;
  background:#ff4da6;
  color:white;
+ font-size:22px;
  border:none;
- font-size:20px;
  z-index:10;
+}
+#message{
+ position:absolute;
+ top:40%;
+ width:100%;
+ text-align:center;
+ color:white;
+ font-family:sans-serif;
+ display:none;
 }
 </style>
 </head>
 <body>
 
-<button id="attackBtn">⚔️</button>
+<button id="attack">⚔️</button>
+<div id="message"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
 <script>
-let scene = new THREE.Scene();
-let camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-let renderer = new THREE.WebGLRenderer({antialias:true});
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-/* LIGHT */
-let light = new THREE.DirectionalLight(0xffffff,1);
+/* Resize fix */
+window.addEventListener("resize",()=>{
+ camera.aspect = window.innerWidth/window.innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* Light */
+const light = new THREE.DirectionalLight(0xffffff,1);
 light.position.set(5,10,5);
 scene.add(light);
 
-/* FLOOR */
-let floorGeo = new THREE.PlaneGeometry(200,200);
-let floorMat = new THREE.MeshPhongMaterial({color:0x88cc88});
-let floor = new THREE.Mesh(floorGeo,floorMat);
+/* Floor */
+const floor = new THREE.Mesh(
+ new THREE.PlaneGeometry(200,200),
+ new THREE.MeshPhongMaterial({color:0x55aa55})
+);
 floor.rotation.x = -Math.PI/2;
 scene.add(floor);
 
-/* HERO (Chibi Style Simple Model) */
-let heroGroup = new THREE.Group();
+/* Hero */
+const hero = new THREE.Group();
 
-let body = new THREE.Mesh(
+const body = new THREE.Mesh(
  new THREE.CylinderGeometry(0.5,0.5,1.2,32),
- new THREE.MeshPhongMaterial({color:0xff99cc})
+ new THREE.MeshPhongMaterial({color:0xff66aa})
 );
-body.position.y = 1;
-heroGroup.add(body);
+body.position.y=1;
+hero.add(body);
 
-let head = new THREE.Mesh(
+const head = new THREE.Mesh(
  new THREE.SphereGeometry(0.7,32,32),
  new THREE.MeshPhongMaterial({color:0xffccdd})
 );
-head.position.y = 2;
-heroGroup.add(head);
+head.position.y=2;
+hero.add(head);
 
-scene.add(heroGroup);
+scene.add(hero);
 
-/* DRAGON */
+/* Dragon */
 let dragon = new THREE.Mesh(
  new THREE.BoxGeometry(2,2,2),
  new THREE.MeshPhongMaterial({color:0x9933ff})
 );
-dragon.position.set(10,1,0);
+dragon.position.set(8,1,0);
 scene.add(dragon);
 
-/* TOWER */
-let tower = new THREE.Mesh(
+/* Tower */
+const tower = new THREE.Mesh(
  new THREE.CylinderGeometry(1.5,1.5,6,32),
  new THREE.MeshPhongMaterial({color:0x888888})
 );
-tower.position.set(20,3,0);
+tower.position.set(18,3,0);
 scene.add(tower);
 
 camera.position.set(0,5,10);
 
-/* MOBILE CONTROL */
-let moveLeft=false, moveRight=false;
+/* Touch movement */
+let moveX = 0;
 
 window.addEventListener("touchstart", e=>{
  if(e.touches[0].clientX < window.innerWidth/2){
-   moveLeft=true;
- } else {
-   moveRight=true;
+   moveX = -1;
+ }else{
+   moveX = 1;
  }
 });
 
-window.addEventListener("touchend", ()=>{
- moveLeft=false;
- moveRight=false;
-});
+window.addEventListener("touchend", ()=> moveX = 0);
 
-/* ATTACK */
-document.getElementById("attackBtn").addEventListener("click", ()=>{
- let dist = heroGroup.position.distanceTo(dragon.position);
+/* Attack */
+document.getElementById("attack").addEventListener("touchstart", ()=>{
+ if(!dragon) return;
+ const dist = hero.position.distanceTo(dragon.position);
  if(dist < 3){
    scene.remove(dragon);
-   alert("🐉 Dragon Defeated!");
+   dragon = null;
  }
 });
 
-/* GAME LOOP */
+/* Game loop */
 function animate(){
  requestAnimationFrame(animate);
 
- if(moveLeft) heroGroup.position.x -= 0.1;
- if(moveRight) heroGroup.position.x += 0.1;
+ hero.position.x += moveX * 0.1;
 
- // Camera follow
- camera.position.x = heroGroup.position.x;
- camera.lookAt(heroGroup.position);
+ camera.position.x = hero.position.x;
+ camera.lookAt(hero.position);
 
- // Win condition
- if(!scene.children.includes(dragon) &&
-    heroGroup.position.distanceTo(tower.position)<3){
-     document.body.innerHTML=`
-     <div style="color:white;text-align:center;margin-top:100px;font-family:sans-serif;">
-     <h1>🏰 Tower Reached!</h1>
-     <h2>Ismayanti Baizura, you saved your husband 💖</h2>
-     <p>
-     5 March — my hero was born.
-     You conquered dragons and reached the tower.
-     Happy Birthday My Warrior Queen.
-     I love you forever.
-     </p>
-     </div>`;
+ if(!dragon && hero.position.distanceTo(tower.position)<3){
+   document.getElementById("message").style.display="block";
+   document.getElementById("message").innerHTML=`
+   <h1>🏰 Tower Reached!</h1>
+   <h2>Ismayanti Baizura 💖</h2>
+   <p>
+   5 March — the day my hero was born.<br>
+   You defeated the dragon and saved your husband.<br>
+   Happy Birthday My Warrior Queen.
+   </p>`;
  }
 
  renderer.render(scene,camera);
