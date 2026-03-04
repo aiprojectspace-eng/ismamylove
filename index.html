@@ -3,18 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Saga BLM: Birthday Sprint!</title>
+    <title>Saga BLM: Ismayanti's Birthday Race!</title>
     <style>
         body { 
             margin: 0; overflow: hidden; background: #0f0f0f; 
             font-family: 'Segoe UI', sans-serif; touch-action: none; color: white;
         }
         canvas { display: block; background: #1a1a1a; margin: 0 auto; }
+        
+        /* UI Top Left - Driver Name */
+        #driver-ui {
+            position: absolute; top: 15px; left: 15px;
+            font-size: 14px; font-weight: bold; color: #ff4757;
+            text-transform: uppercase; letter-spacing: 1px;
+            text-shadow: 0 0 5px #ff4757; z-index: 5;
+        }
+
         #ui { 
             position: absolute; top: 25px; width: 100%; text-align: center; 
             font-size: 32px; font-weight: 900; pointer-events: none; color: #fff;
             text-shadow: 0 0 10px #ff4757; z-index: 5;
         }
+
+        /* Floating Text Style */
+        #praise-ui {
+            position: absolute; top: 40%; width: 100%; text-align: center;
+            font-size: 28px; font-weight: bold; color: #feca57;
+            text-shadow: 0 0 10px #000; pointer-events: none;
+            z-index: 6; opacity: 0; transition: opacity 0.2s;
+        }
+
         #overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
@@ -35,11 +53,13 @@
 </head>
 <body>
 
+    <div id="driver-ui">Driver: Ismayanti Baizura 🏎️</div>
     <div id="ui">❤️ <span id="score">0</span> / 10</div>
+    <div id="praise-ui">Nice Sayang!</div>
 
     <div id="overlay">
         <div class="message-panel">
-            <h1 style="color:#ff4757">Saga BLM Sprint 🏎️</h1>
+            <h1 style="color:#ff4757">Saga BLM Sprint</h1>
             <p id="msg-p">Elak <b>STRESS</b> 💢<br>Kutip 10 <b>LOVE</b> ❤️<br><br>Guna tap <b>KIRI/KANAN</b></p>
             <button class="btn" id="startBtn">Mula Enjin</button>
         </div>
@@ -48,13 +68,13 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Deklarasi semua variable kat atas supaya global
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
         const overlay = document.getElementById('overlay');
         const startBtn = document.getElementById('startBtn');
         const msgP = document.getElementById('msg-p');
+        const praiseUi = document.getElementById('praise-ui');
 
         let gameRunning = false;
         let score = 0;
@@ -63,6 +83,12 @@
         let speed = 6;
         let roadOffset = 0;
         let shakeTime = 0;
+
+        const praises = [
+            "Nice Sayang!", "Good Job Yang!", "Great Adindaku!", 
+            "Almost There Sayang!", "Sikit Lagi!", "Yahooo!", 
+            "Sayang Power!", "Racing Eh Yang?"
+        ];
 
         const carImg = new Image();
         carImg.src = 'saga_blm.png'; 
@@ -84,7 +110,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Game Controls
         window.addEventListener('touchstart', (e) => {
             if (!gameRunning) return;
             const touchX = e.touches[0].clientX;
@@ -96,15 +121,20 @@
             updateCarX();
         });
 
+        function showPraise() {
+            const randomWord = praises[Math.floor(Math.random() * praises.length)];
+            praiseUi.innerText = randomWord;
+            praiseUi.style.opacity = 1;
+            setTimeout(() => { praiseUi.style.opacity = 0; }, 800);
+        }
+
         function spawnItem() {
             const lane = Math.floor(Math.random() * 3);
             const isLove = Math.random() > 0.4; 
             items.push({ lane, y: -100, type: isLove ? '❤️' : '💢', isGood: isLove });
         }
 
-        // FUNGSI UTAMA
         function startGame() {
-            console.log("Game Starting...");
             score = 0;
             items = [];
             speed = 6;
@@ -117,12 +147,11 @@
         function winGame() {
             gameRunning = false;
             overlay.classList.remove('hidden');
-            document.querySelector('h1').innerHTML = "HAPPY BIRTHDAY SAYANG! 🎂";
-            msgP.innerHTML = "Saga Silver ni berjaya bawa cinta saya kat awak!<br><br>I love you so much! ❤️🌹";
+            document.querySelector('h1').innerHTML = "SELAMAT HARI LAHIR ISMAYANTI! 🎂";
+            msgP.innerHTML = "Saga Silver ni berjaya bawa cinta saya kat awak!<br><br>I love you so much, Baizura! ❤️🌹";
             startBtn.innerText = "Main Lagi";
         }
 
-        // Attach event listener guna JavaScript (lebih selamat dari onclick HTML)
         startBtn.addEventListener('click', startGame);
 
         function drawRoad() {
@@ -182,6 +211,7 @@
                         score++;
                         scoreEl.innerText = score;
                         shakeTime = 10; 
+                        showPraise(); // Keluar random word
                         if (score >= 10) winGame();
                     } else {
                         score = Math.max(0, score - 1);
