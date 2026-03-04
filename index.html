@@ -2,216 +2,203 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti Baizura ❤️</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-
+<title>Quest of My Heart - Ismayanti Baizura</title>
 <style>
-body{
+body {
     margin:0;
-    overflow:hidden;
-    background:black;
-    font-family:'Montserrat',sans-serif;
-    color:white;
-}
-
-canvas{
-    position:fixed;
-    top:0;
-    left:0;
-}
-
-.content{
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
+    font-family: 'Comic Sans MS', cursive;
+    background: linear-gradient(to bottom, #ffd6ec, #e6ccff);
     text-align:center;
-    width:90%;
+    color:#5a2d82;
 }
 
-h1{
-    font-family:'Playfair Display',serif;
-    font-size:2.4rem;
-    opacity:0;
-    animation:fadeIn 3s forwards 2s;
-}
-
-.name{
-    font-size:2rem;
-    font-weight:700;
-    margin-top:10px;
-    color:#ffd700;
-    text-shadow:0 0 15px gold,0 0 30px orange,0 0 50px pink;
-    opacity:0;
-    animation:fadeIn 3s forwards 4s;
-}
-
-button{
-    margin-top:25px;
-    padding:12px 30px;
-    border:none;
-    border-radius:40px;
-    background:linear-gradient(45deg,#ffd700,#ff69b4);
-    color:black;
-    font-weight:700;
-    cursor:pointer;
-    opacity:0;
-    animation:fadeIn 3s forwards 6s;
-}
-
-button:active{
-    transform:scale(0.95);
-}
-
-.message{
+.screen {
     display:none;
-    margin-top:25px;
-    font-size:1.1rem;
-    line-height:1.6;
-    animation:fadeText 2s forwards;
+    padding:40px;
 }
 
-.music{
-    position:fixed;
-    bottom:10px;
-    right:10px;
-    width:1px;
-    height:1px;
-    opacity:0;
+button {
+    background:#ff99cc;
+    border:none;
+    padding:12px 20px;
+    border-radius:20px;
+    font-size:16px;
+    margin:10px;
+    cursor:pointer;
 }
 
-@keyframes fadeIn{
-    from{opacity:0; transform:translate(-50%,-40%);}
-    to{opacity:1; transform:translate(-50%,-50%);}
+button:hover {
+    background:#ff66b2;
 }
 
-@keyframes fadeText{
-    from{opacity:0;}
-    to{opacity:1;}
+#startScreen {
+    display:block;
 }
+
+.map-location {
+    display:block;
+    margin:15px;
+    font-size:18px;
+}
+
+#loveBar {
+    width:300px;
+    height:20px;
+    background:#fff;
+    margin:20px auto;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+#loveFill {
+    height:100%;
+    width:0%;
+    background:#ff66b2;
+}
+
+.hpbar {
+    width:300px;
+    height:20px;
+    background:#fff;
+    margin:10px auto;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.hpfill {
+    height:100%;
+    width:100%;
+    background:#ff4d4d;
+}
+
+.character {
+    font-size:80px;
+}
+
 </style>
 </head>
-
 <body>
 
-<canvas id="space"></canvas>
-
-<div class="content">
-    <h1>Happy Birthday</h1>
-    <div class="name">Ismayanti Baizura ✨</div>
-    <button onclick="reveal()">Open Your Universe 🌌</button>
-
-    <div class="message" id="msg">
-        Sayang,<br><br>
-        Dalam berjuta bintang di langit,<br>
-        I tetap pilih awak.<br><br>
-        And after all this time...<br>
-        you’re still the one I love ❤️<br><br>
-        Terima kasih jadi isteri paling kuat,<br>
-        paling sabar, dan paling cantik dalam hidup I.<br><br>
-        Happy Birthday, My Queen 👑
-    </div>
+<!-- START SCREEN -->
+<div id="startScreen" class="screen">
+    <h1>💖 Quest of My Heart 💖</h1>
+    <h2>Hero: Ismayanti Baizura</h2>
+    <p>Your mission: Save your husband from the Lonely Tower 🏰</p>
+    <button onclick="showScreen('mapScreen')">Start Adventure</button>
 </div>
 
-<!-- YouTube Music Autoplay -->
-<div class="music">
-<iframe width="0" height="0"
-src="https://www.youtube.com/embed/KNZH-emehxA?autoplay=1&loop=1&playlist=KNZH-emehxA"
-frameborder="0"
-allow="autoplay">
-</iframe>
+<!-- MAP -->
+<div id="mapScreen" class="screen">
+    <h2>🌸 World Map 🌸</h2>
+    <div id="loveBar"><div id="loveFill"></div></div>
+    <p>Love Points: <span id="lovePoints">0</span>/100</p>
+
+    <button class="map-location" onclick="showScreen('forestScreen')">🌳 Forest of Memories</button>
+    <button class="map-location" onclick="showScreen('dragonScreen')">🐉 Dragon Field</button>
+    <button class="map-location" onclick="enterTower()">🏰 Lonely Tower</button>
+</div>
+
+<!-- FOREST QUIZ -->
+<div id="forestScreen" class="screen">
+    <h2>🌳 Forest of Memories</h2>
+    <p>Who confessed first?</p>
+    <button onclick="correctAnswer()">Abang 😎</button>
+    <button onclick="wrongAnswer()">You 💅</button>
+    <button onclick="wrongAnswer()">Both shy 😂</button>
+    <br><br>
+    <button onclick="showScreen('mapScreen')">Back to Map</button>
+</div>
+
+<!-- DRAGON BATTLE -->
+<div id="dragonScreen" class="screen">
+    <h2>🐉 The Aging Dragon Appears!</h2>
+    <div class="character">🐲</div>
+    <div class="hpbar"><div id="dragonHP" class="hpfill"></div></div>
+    <p>Dragon HP: <span id="dragonHPText">100</span></p>
+    <button onclick="attack()">⚔️ Attack</button>
+    <button onclick="loveBlast()">💖 Love Blast</button>
+    <br><br>
+    <button onclick="showScreen('mapScreen')">Retreat</button>
+</div>
+
+<!-- TOWER -->
+<div id="towerScreen" class="screen">
+    <h2>🏰 Lonely Tower</h2>
+    <div class="character">🤴</div>
+    <p>"I knew only my hero could save me..."</p>
+    <h2>💖 Happy Birthday Ismayanti Baizura 💖</h2>
+    <p>5 March — The day the world received its greatest blessing.</p>
+    <p>
+        Thank you for being my strength, my happiness,  
+        my forever adventure partner.  
+        Every dragon we fight, we fight together.  
+        I love you always.
+    </p>
 </div>
 
 <script>
-const canvas=document.getElementById("space");
-const ctx=canvas.getContext("2d");
 
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
+let lovePoints = 0;
+let dragonHP = 100;
 
-let stars=[];
-let shootingStars=[];
-
-for(let i=0;i<300;i++){
-    stars.push({
-        x:Math.random()*canvas.width,
-        y:Math.random()*canvas.height,
-        size:Math.random()*2,
-        speed:Math.random()*0.6,
-        depth:Math.random()*3
-    });
-}
-
-function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    stars.forEach(s=>{
-        ctx.beginPath();
-        ctx.arc(s.x,s.y,s.size,0,Math.PI*2);
-        ctx.fillStyle="white";
-        ctx.fill();
-
-        s.y+=s.speed*s.depth;
-        if(s.y>canvas.height){
-            s.y=0;
-            s.x=Math.random()*canvas.width;
-        }
-    });
-
-    shootingStars.forEach((s,i)=>{
-        ctx.beginPath();
-        ctx.moveTo(s.x,s.y);
-        ctx.lineTo(s.x-25,s.y+25);
-        ctx.strokeStyle="white";
-        ctx.stroke();
-        s.x+=6;
-        s.y+=6;
-        if(s.x>canvas.width||s.y>canvas.height){
-            shootingStars.splice(i,1);
-        }
-    });
-
-    if(Math.random()<0.01){
-        shootingStars.push({
-            x:Math.random()*canvas.width,
-            y:0
-        });
+function showScreen(id) {
+    let screens = document.getElementsByClassName("screen");
+    for (let i = 0; i < screens.length; i++) {
+        screens[i].style.display = "none";
     }
-
-    requestAnimationFrame(animate);
+    document.getElementById(id).style.display = "block";
 }
 
-animate();
-
-function reveal(){
-    document.getElementById("msg").style.display="block";
-    galaxyBurst();
+function addLove(points) {
+    lovePoints += points;
+    if(lovePoints > 100) lovePoints = 100;
+    document.getElementById("lovePoints").innerText = lovePoints;
+    document.getElementById("loveFill").style.width = lovePoints + "%";
 }
 
-function galaxyBurst(){
-    for(let i=0;i<120;i++){
-        stars.push({
-            x:canvas.width/2,
-            y:canvas.height/2,
-            size:Math.random()*3,
-            speed:Math.random()*2,
-            depth:Math.random()*4
-        });
+function correctAnswer() {
+    alert("Correct! +30 Love Points 💖");
+    addLove(30);
+}
+
+function wrongAnswer() {
+    alert("Hehehe wrong answer 😜");
+}
+
+function attack() {
+    dragonHP -= 20;
+    updateDragon();
+}
+
+function loveBlast() {
+    if(lovePoints >= 50) {
+        dragonHP -= 40;
+        alert("Super Love Blast! 💖✨");
+    } else {
+        alert("Not enough Love Points!");
+    }
+    updateDragon();
+}
+
+function updateDragon() {
+    if(dragonHP <= 0) {
+        dragonHP = 0;
+        alert("Dragon defeated! It turned into a birthday cake! 🎂");
+        addLove(50);
+        showScreen('mapScreen');
+    }
+    document.getElementById("dragonHP").style.width = dragonHP + "%";
+    document.getElementById("dragonHPText").innerText = dragonHP;
+}
+
+function enterTower() {
+    if(lovePoints >= 100) {
+        showScreen('towerScreen');
+    } else {
+        alert("You need 100 Love Points to enter the Tower 💔");
     }
 }
 
-canvas.addEventListener("touchmove",function(e){
-    let touch=e.touches[0];
-    stars.push({
-        x:touch.clientX,
-        y:touch.clientY,
-        size:2,
-        speed:1,
-        depth:3
-    });
-});
 </script>
 
 </body>
