@@ -47,13 +47,11 @@ font-weight:bold;
 <div id="joy"></div>
 <button id="attack">⚔️</button>
 
-<!-- ✅ THREE -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
+<!-- ✅ MODULE VERSION (FIX LOADER ERROR) -->
+<script type="module">
 
-<!-- ✅ GLTF LOADER -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.160/examples/js/loaders/GLTFLoader.js"></script>
-
-<script>
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
+import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/loaders/GLTFLoader.js";
 
 /* ===================== */
 /* BASIC SETUP */
@@ -95,7 +93,7 @@ camera.position.set(0,5,12);
 /* LOAD MODELS */
 /* ===================== */
 
-const loader = new GLTFLoader(); // ✅ IMPORTANT FIX
+const loader = new GLTFLoader();
 
 let hero = null;
 let dragon = null;
@@ -189,7 +187,7 @@ renderer.render(scene,camera);
 
 animate();
 
-/* RESIZE FIX */
+/* RESIZE */
 
 window.addEventListener("resize",()=>{
 camera.aspect = window.innerWidth/window.innerHeight;
