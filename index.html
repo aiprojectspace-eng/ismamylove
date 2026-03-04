@@ -10,8 +10,8 @@ body{
 margin:0;
 overflow:hidden;
 background:#111;
-font-family:Arial;
 touch-action:none;
+font-family:Arial;
 }
 
 canvas{
@@ -22,8 +22,8 @@ display:block;
 position:absolute;
 right:30px;
 bottom:40px;
-width:80px;
-height:80px;
+width:90px;
+height:90px;
 border-radius:50%;
 border:none;
 background:#ff4da6;
@@ -36,7 +36,7 @@ font-weight:bold;
 position:absolute;
 top:20px;
 left:20px;
-width:200px;
+width:250px;
 height:20px;
 background:red;
 }
@@ -64,42 +64,26 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 /* ================= */
-/* LOAD SPRITES */
-/* ================= */
-
-const heroImg = new Image();
-heroImg.src = "https://i.imgur.com/5b6XQ5M.png"; // princess sprite
-
-const dragonImg = new Image();
-dragonImg.src = "https://i.imgur.com/7yUve0A.png"; // dragon sprite
-
-const bg = new Image();
-bg.src = "https://i.imgur.com/8pQYFqk.jpg"; // forest background
-
-/* ================= */
-/* GAME VARIABLES */
+/* GAME OBJECTS */
 /* ================= */
 
 let hero = {
 x:100,
-y:canvas.height-200,
-width:120,
-height:120,
-hp:100
+y:canvas.height-250,
+width:80,
+height:120
 };
 
 let dragon = {
 x:canvas.width-250,
-y:canvas.height-250,
+y:canvas.height-300,
 width:150,
 height:150,
 hp:100
 };
 
-let keys = {};
-
 /* ================= */
-/* CONTROLS */
+/* TOUCH MOVE */
 /* ================= */
 
 canvas.addEventListener("touchmove",(e)=>{
@@ -107,20 +91,21 @@ let touch = e.touches[0];
 hero.x = touch.clientX - hero.width/2;
 });
 
+/* ================= */
+/* ATTACK */
+/* ================= */
+
 document.getElementById("attackBtn")
 .addEventListener("touchstart",()=>{
 attack();
 });
 
-/* ================= */
-/* ATTACK FUNCTION */
-/* ================= */
-
 function attack(){
 let dx = hero.x - dragon.x;
 
-if(Math.abs(dx) < 150){
+if(Math.abs(dx) < 180){
 dragon.hp -= 20;
+
 if(dragon.hp <= 0){
 dragon.hp = 0;
 setTimeout(()=>{
@@ -131,25 +116,54 @@ showVictory();
 }
 
 /* ================= */
-/* DRAW GAME */
+/* DRAW HERO (CUTE PRINCESS SHAPE) */
 /* ================= */
 
-function draw(){
+function drawHero(){
+ctx.fillStyle = "#ff66cc";
+ctx.beginPath();
+ctx.arc(hero.x + hero.width/2,
+hero.y + 40,
+40,
+0,
+Math.PI*2);
+ctx.fill();
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-ctx.drawImage(bg,0,0,canvas.width,canvas.height);
-
-/* HERO */
-ctx.drawImage(heroImg,hero.x,hero.y,hero.width,hero.height);
-
-/* DRAGON */
-if(dragon.hp > 0){
-ctx.drawImage(dragonImg,dragon.x,dragon.y,dragon.width,dragon.height);
+/* body */
+ctx.fillRect(hero.x,
+hero.y + 40,
+hero.width,
+hero.height - 40);
 }
 
-/* HP BAR */
-document.getElementById("hpFill").style.width = dragon.hp + "%";
+/* ================= */
+/* DRAW DRAGON */
+/* ================= */
+
+function drawDragon(){
+if(dragon.hp <= 0) return;
+
+ctx.fillStyle = "#9933ff";
+ctx.beginPath();
+ctx.arc(dragon.x + 75,
+dragon.y + 75,
+75,
+0,
+Math.PI*2);
+ctx.fill();
+
+/* hp bar above dragon */
+ctx.fillStyle="red";
+ctx.fillRect(dragon.x,
+dragon.y - 20,
+150,
+10);
+
+ctx.fillStyle="lime";
+ctx.fillRect(dragon.x,
+dragon.y - 20,
+dragon.hp/100 * 150,
+10);
 }
 
 /* ================= */
@@ -157,7 +171,16 @@ document.getElementById("hpFill").style.width = dragon.hp + "%";
 /* ================= */
 
 function update(){
-draw();
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.fillStyle="#2c3e50";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+drawHero();
+drawDragon();
+
+document.getElementById("hpFill").style.width = dragon.hp + "%";
+
 requestAnimationFrame(update);
 }
 
@@ -172,11 +195,8 @@ function showVictory(){
 document.body.innerHTML = `
 <div style="color:white;text-align:center;margin-top:200px;">
 <h1>🐉 Dragon Defeated!</h1>
-<h2>Ismayanti Baizura ❤️</h2>
-<p>
-You saved your kingdom.<br>
-Happy Birthday My Warrior Queen.
-</p>
+<h2>Happy Birthday Ismayanti ❤️</h2>
+<p>You saved your kingdom.</p>
 </div>
 `;
 }
