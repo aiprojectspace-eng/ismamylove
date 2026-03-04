@@ -5,128 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Saga BLM: Birthday Sprint!</title>
     <style>
-        /* CSS untuk nampak ARCADE & MODERN */
         body { 
             margin: 0; 
             overflow: hidden; 
-            background: #111; /* Hitam pekat untuk kontra neon */
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background: #0f0f0f; 
+            font-family: 'Segoe UI', sans-serif; 
             touch-action: none; 
             color: white;
         }
 
         canvas { 
             display: block; 
-            background: #222; /* Warna jalan bertar */
+            background: #1a1a1a; 
             margin: 0 auto; 
-            /* Efek glowing pada tepi jalan */
-            box-shadow: 0 0 50px rgba(255, 71, 87, 0.3); 
+            box-shadow: 0 0 50px rgba(255, 71, 87, 0.2); 
         }
         
-        /* UI Score Neon */
         #ui { 
             position: absolute; 
             top: 25px; 
             width: 100%; 
             text-align: center; 
-            font-size: 28px; 
-            font-weight: 800; 
+            font-size: 32px; 
+            font-weight: 900; 
             pointer-events: none; 
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            /* Neon glow merah */
             color: #fff;
-            text-shadow: 0 0 10px #ff4757, 0 0 20px #ff4757, 0 0 30px #ff4757;
+            text-shadow: 0 0 10px #ff4757, 0 0 20px #ff4757;
             z-index: 5;
-            transition: transform 0.1s ease-out; /* Untuk efek denyut */
         }
 
-        #score.pulse {
-            transform: scale(1.3);
-        }
-
-        /* Skrin Overlays (Start/Win) */
         #overlay { 
             position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            /* Gradient Background Gelap & Romantik */
-            background: linear-gradient(135deg, rgba(17,17,17,0.95) 0%, rgba(44,0,10,0.95) 100%);
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            color: white; 
-            text-align: center; 
-            padding: 40px; 
-            box-sizing: border-box; 
-            z-index: 10;
-            backdrop-filter: blur(5px); /* Efek blur background */
+            top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(50,0,20,0.9) 100%);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; 
+            z-index: 10; backdrop-filter: blur(8px);
         }
 
-        /* Border Glow untuk Panel Mesej */
         .message-panel {
             background: rgba(255,255,255,0.05);
-            padding: 30px;
-            border-radius: 20px;
-            border: 2px solid rgba(255, 71, 87, 0.5);
-            box-shadow: 0 0 30px rgba(255, 71, 87, 0.3);
-            max-width: 400px;
+            padding: 40px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            max-width: 85%;
+            text-align: center;
         }
 
         .btn { 
-            padding: 18px 50px; 
-            font-size: 22px; 
-            cursor: pointer; 
-            background: #ff4757; 
-            color: white; 
-            border: none; 
-            border-radius: 50px; 
-            margin-top: 30px; 
-            font-weight: bold;
+            padding: 18px 45px; font-size: 20px; cursor: pointer; 
+            background: #ff4757; color: white; border: none; 
+            border-radius: 50px; margin-top: 30px; font-weight: bold;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            /* Neon Button Glow */
-            box-shadow: 0 0 15px #ff4757, 0 5px 0 #b3313c;
-            transition: all 0.1s ease;
         }
 
-        .btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 0 10px #ff4757, 0 2px 0 #b3313c;
-        }
-
-        h1 { 
-            color: white; 
-            margin-top: 0;
-            margin-bottom: 15px; 
-            font-size: 2.8rem; 
-            text-transform: uppercase;
-            text-shadow: 0 0 15px #ff4757;
-        }
-
-        p { 
-            font-size: 1.2rem; 
-            line-height: 1.6; 
-            color: #ddd; 
-            margin: 0;
-        }
-        
-        b { color: #ff4757; text-shadow: 0 0 5px #ff4757; }
-
+        h1 { font-size: 2.2rem; margin: 0 0 15px 0; color: #ff4757; text-shadow: 0 0 10px rgba(255,71,87,0.5); }
+        p { font-size: 1.1rem; line-height: 1.5; color: #eee; margin: 0; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="ui">LOVE: <span id="score">0</span> / 10</div>
+    <div id="ui">❤️ <span id="score">0</span> / 10</div>
 
     <div id="overlay">
         <div class="message-panel">
             <h1 id="msg-title">Saga BLM Sprint 🏎️</h1>
-            <p id="msg-p">Sayang, tap <b>KIRI</b> atau <b>KANAN</b> skrin.<br><br>Elak 'STRESS' 💢<br>Kutip 10 'LOVE' ❤️!</p>
+            <p id="msg-p">Elak <b>STRESS</b> 💢<br>Kutip 10 <b>LOVE</b> ❤️<br><br>Guna tap <b>KIRI/KANAN</b></p>
             <button class="btn" onclick="startGame()">Mula Enjin</button>
         </div>
     </div>
@@ -137,50 +83,38 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
-        const uiEl = document.getElementById('ui');
         const overlay = document.getElementById('overlay');
         const msgTitle = document.getElementById('msg-title');
         const msgP = document.getElementById('msg-p');
 
-        // Game State
         let gameRunning = false;
         let score = 0;
         let frame = 0;
         let items = [];
-        let speed = 6.5; // Up sikit laju dia
-        let roadOffset = 0; // Untuk animasi jalan
+        let speed = 6;
+        let roadOffset = 0;
+        let shakeTime = 0;
 
-        // Load Car Image
         const carImg = new Image();
         carImg.src = 'saga_blm.png'; 
 
-        // Car Object (Adjusted size for new design)
-        let car = {
-            lane: 1, 
-            w: 65,   // Lebar kereta sikit besar
-            h: 120,  // Tinggi kereta sikit besar
-            x: 0,
-            y: 0
-        };
+        let car = { lane: 1, w: 65, h: 125, x: 0, y: 0 };
 
         function resize() {
-            // Mobile-first aspect ratio (portrait)
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            car.y = canvas.height - 180; // Letak kereta sikit atas
+            car.y = canvas.height - 180;
             updateCarX();
         }
 
         function updateCarX() {
             const laneWidth = canvas.width / 3;
-            // Ejas sikit supaya kereta center dalam lane
             car.x = (car.lane * laneWidth) + (laneWidth / 2) - (car.w / 2);
         }
 
         window.addEventListener('resize', resize);
         resize();
 
-        // Control: Tap Kiri/Kanan
         window.addEventListener('touchstart', (e) => {
             if (!gameRunning) return;
             const touchX = e.touches[0].clientX;
@@ -194,146 +128,5 @@
 
         function spawnItem() {
             const lane = Math.floor(Math.random() * 3);
-            const isLove = Math.random() > 0.45; // 55% Love, 45% Stress
+            const isLove = Math.random() > 0.4; 
             items.push({
-                lane: lane,
-                y: -120,
-                type: isLove ? '❤️' : '💢',
-                isGood: isLove,
-                size: isLove ? 45 : 50 // Stress besar sikit
-            });
-        }
-
-        function startGame() {
-            score = 0;
-            items = [];
-            roadOffset = 0;
-            gameRunning = true;
-            overlay.classList.add('hidden');
-            scoreEl.innerText = score;
-            document.querySelector('.btn').innerText = "Main Semula"; // Siap-siap tukar teks
-            animate();
-        }
-
-        function winGame() {
-            gameRunning = false;
-            overlay.classList.remove('hidden');
-            msgTitle.innerHTML = "Selamat<br>Hari Lahir! ❤️";
-            msgTitle.style.textShadow = "0 0 15px #fff, 0 0 25px #ff4757"; // Extra glow
-            msgP.innerHTML = "Saga BLM ni dah sampai ke hati awak!<br><br>Terima kasih sebab sentiasa ada dengan saya. Saya sayang awak sangat-sangat! 🎂🌹";
-        }
-
-        function pulseScore() {
-            scoreEl.classList.add('pulse');
-            setTimeout(() => scoreEl.classList.remove('pulse'), 100);
-        }
-
-        function drawRoad() {
-            const w = canvas.width;
-            const h = canvas.height;
-            const laneW = w / 3;
-
-            // Bergerakkan garisan jalan (Parallax)
-            roadOffset += speed;
-            if (roadOffset > 100) roadOffset = 0;
-
-            // 1. Garisan Putus-Putus Tengah (Neon Putih Gelap)
-            ctx.strokeStyle = "rgba(255,255,255,0.15)";
-            ctx.lineWidth = 4;
-            ctx.setLineDash([30, 70]);
-            
-            ctx.beginPath();
-            ctx.moveTo(laneW, roadOffset - 100); ctx.lineTo(laneW, h + 100);
-            ctx.moveTo(2*laneW, roadOffset - 100); ctx.lineTo(2*laneW, h + 100);
-            ctx.stroke();
-            ctx.setLineDash([]); // Reset line dash
-
-            // 2. Garisan Tepi Jalan (Neon Merah)
-            ctx.strokeStyle = "#ff4757";
-            ctx.lineWidth = 6;
-            ctx.beginPath();
-            // Kiri
-            ctx.moveTo(5, 0); ctx.lineTo(5, h);
-            // Kanan
-            ctx.moveTo(w - 5, 0); ctx.lineTo(w - 5, h);
-            // Tambah glow pada garisan tepi
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = "#ff4757";
-            ctx.stroke();
-            ctx.shadowBlur = 0; // Reset glow
-        }
-
-        function animate() {
-            if (!gameRunning) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            drawRoad();
-
-            // Draw Saga BLM
-            if (carImg.complete) {
-                // Tambah sikit shadow bawah kereta
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = "rgba(0,0,0,0.5)";
-                ctx.drawImage(carImg, car.x, car.y, car.w, car.h);
-                ctx.shadowBlur = 0; // Reset shadow
-            } else {
-                // Fallback
-                ctx.fillStyle = "#ccc";
-                ctx.fillRect(car.x, car.y, car.w, car.h);
-            }
-
-            // Spawn & Move Items
-            if (frame % 45 === 0) spawnItem(); // Spawn laju sikit
-            
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-
-            for (let i = items.length - 1; i >= 0; i--) {
-                let it = items[i];
-                it.y += speed;
-                
-                const laneWidth = canvas.width / 3;
-                let itemX = (it.lane * laneWidth) + (laneWidth / 2);
-                
-                // Draw Item with Glow
-                ctx.font = `${it.size}px Arial`;
-                if (it.isGood) {
-                    // Glow Pink/Merah untuk Love
-                    ctx.shadowBlur = 20;
-                    ctx.shadowColor = "#ff4757";
-                } else {
-                    // Glow Merah Pekat untuk Stress
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = "#ff0000";
-                }
-                ctx.fillText(it.type, itemX, it.y);
-                ctx.shadowBlur = 0; // Reset glow
-
-                // Collision Detection (Hitbox ejas sikit bagi kemas)
-                const hitBuffer = 20; // Bagi chance sikit kalau sipi-sipi
-                if (it.y + (it.size/2) > car.y + hitBuffer && it.y - (it.size/2) < car.y + car.h - hitBuffer) {
-                    if (it.lane === car.lane) {
-                        if (it.isGood) {
-                            score++;
-                            scoreEl.innerText = score;
-                            pulseScore();
-                            if (score >= 10) winGame();
-                        } else {
-                            score = Math.max(0, score - 2); // Stress tolak 2 point baru 'stres'
-                            scoreEl.innerText = score;
-                            pulseScore(); // Kasi denyut juga
-                        }
-                        items.splice(i, 1);
-                    }
-                }
-
-                // Remove off-screen items
-                if (it.y > canvas.height + 100) items.splice(i, 1);
-            }
-
-            frame++;
-            requestAnimationFrame(animate);
-        }
-    </script>
-</body>
-</html>
