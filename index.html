@@ -3,154 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti 3D Birthday Quest</title>
+<title>Ismayanti 3D RPG</title>
+
 <style>
-body{margin:0;overflow:hidden;background:black;}
-#attack{
- position:absolute;
- right:20px;
- bottom:30px;
- width:80px;
- height:80px;
- border-radius:50%;
- background:#ff4da6;
- color:white;
- font-size:22px;
- border:none;
- z-index:10;
+body{
+margin:0;
+overflow:hidden;
+background:black;
+touch-action:none;
 }
-#message{
- position:absolute;
- top:40%;
- width:100%;
- text-align:center;
- color:white;
- font-family:sans-serif;
- display:none;
+
+canvas{
+display:block;
+}
+
+/* JOYSTICK */
+#joy{
+position:absolute;
+left:30px;
+bottom:40px;
+width:120px;
+height:120px;
+border-radius:50%;
+background:rgba(255,255,255,0.2);
+}
+
+/* ATTACK BUTTON */
+#attack{
+position:absolute;
+right:30px;
+bottom:40px;
+width:80px;
+height:80px;
+border-radius:50%;
+border:none;
+background:#ff4da6;
+color:white;
+font-size:20px;
+font-weight:bold;
 }
 </style>
+
 </head>
 <body>
 
+<!-- UI -->
+<div id="joy"></div>
 <button id="attack">⚔️</button>
-<div id="message"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<!-- THREE JS -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160/examples/js/loaders/GLTFLoader.js"></script>
 
-<script>
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
+<!-- GAME LOGIC -->
+<script src="./game.js"></script>
 
-const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-document.body.appendChild(renderer.domElement);
-
-/* Resize fix */
-window.addEventListener("resize",()=>{
- camera.aspect = window.innerWidth/window.innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-/* Light */
-const light = new THREE.DirectionalLight(0xffffff,1);
-light.position.set(5,10,5);
-scene.add(light);
-
-/* Floor */
-const floor = new THREE.Mesh(
- new THREE.PlaneGeometry(200,200),
- new THREE.MeshPhongMaterial({color:0x55aa55})
-);
-floor.rotation.x = -Math.PI/2;
-scene.add(floor);
-
-/* Hero */
-const hero = new THREE.Group();
-
-const body = new THREE.Mesh(
- new THREE.CylinderGeometry(0.5,0.5,1.2,32),
- new THREE.MeshPhongMaterial({color:0xff66aa})
-);
-body.position.y=1;
-hero.add(body);
-
-const head = new THREE.Mesh(
- new THREE.SphereGeometry(0.7,32,32),
- new THREE.MeshPhongMaterial({color:0xffccdd})
-);
-head.position.y=2;
-hero.add(head);
-
-scene.add(hero);
-
-/* Dragon */
-let dragon = new THREE.Mesh(
- new THREE.BoxGeometry(2,2,2),
- new THREE.MeshPhongMaterial({color:0x9933ff})
-);
-dragon.position.set(8,1,0);
-scene.add(dragon);
-
-/* Tower */
-const tower = new THREE.Mesh(
- new THREE.CylinderGeometry(1.5,1.5,6,32),
- new THREE.MeshPhongMaterial({color:0x888888})
-);
-tower.position.set(18,3,0);
-scene.add(tower);
-
-camera.position.set(0,5,10);
-
-/* Touch movement */
-let moveX = 0;
-
-window.addEventListener("touchstart", e=>{
- if(e.touches[0].clientX < window.innerWidth/2){
-   moveX = -1;
- }else{
-   moveX = 1;
- }
-});
-
-window.addEventListener("touchend", ()=> moveX = 0);
-
-/* Attack */
-document.getElementById("attack").addEventListener("touchstart", ()=>{
- if(!dragon) return;
- const dist = hero.position.distanceTo(dragon.position);
- if(dist < 3){
-   scene.remove(dragon);
-   dragon = null;
- }
-});
-
-/* Game loop */
-function animate(){
- requestAnimationFrame(animate);
-
- hero.position.x += moveX * 0.1;
-
- camera.position.x = hero.position.x;
- camera.lookAt(hero.position);
-
- if(!dragon && hero.position.distanceTo(tower.position)<3){
-   document.getElementById("message").style.display="block";
-   document.getElementById("message").innerHTML=`
-   <h1>🏰 Tower Reached!</h1>
-   <h2>Ismayanti Baizura 💖</h2>
-   <p>
-   5 March — the day my hero was born.<br>
-   You defeated the dragon and saved your husband.<br>
-   Happy Birthday My Warrior Queen.
-   </p>`;
- }
-
- renderer.render(scene,camera);
-}
-animate();
-</script>
 </body>
 </html>
