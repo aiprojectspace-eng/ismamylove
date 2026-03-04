@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti 2D RPG</title>
+<title>Ismayanti RPG 2D Pro</title>
 
 <style>
 body{
@@ -67,20 +67,26 @@ canvas.height = window.innerHeight;
 /* GAME OBJECTS */
 /* ================= */
 
-let hero = {
+const hero = {
 x:100,
-y:canvas.height-250,
-width:80,
-height:120
+y:canvas.height-200,
+width:60,
+height:80,
+speed:5,
+cooldown:0
 };
 
-let dragon = {
-x:canvas.width-250,
-y:canvas.height-300,
-width:150,
-height:150,
-hp:100
+const dragon = {
+x:canvas.width-200,
+y:canvas.height-250,
+width:120,
+height:120,
+hp:100,
+speed:2,
+direction:-1
 };
+
+let projectiles = [];
 
 /* ================= */
 /* TOUCH MOVE */
@@ -92,99 +98,120 @@ hero.x = touch.clientX - hero.width/2;
 });
 
 /* ================= */
-/* ATTACK */
+/* ATTACK SYSTEM (WITH COOLDOWN) */
 /* ================= */
 
 document.getElementById("attackBtn")
 .addEventListener("touchstart",()=>{
-attack();
+if(hero.cooldown <= 0){
+shoot();
+hero.cooldown = 30;
+}
 });
 
-function attack(){
-let dx = hero.x - dragon.x;
+function shoot(){
+projectiles.push({
+x:hero.x + hero.width,
+y:hero.y + 30,
+speed:8
+});
+}
 
-if(Math.abs(dx) < 180){
-dragon.hp -= 20;
+/* ================= */
+/* UPDATE GAME LOGIC */
+/* ================= */
+
+function update(){
+
+/* Hero cooldown */
+if(hero.cooldown > 0){
+hero.cooldown--;
+}
+
+/* Dragon AI movement */
+dragon.x += dragon.speed * dragon.direction;
+
+if(dragon.x < canvas.width/2 || dragon.x > canvas.width-150){
+dragon.direction *= -1;
+}
+
+/* Projectile movement */
+projectiles.forEach((bullet,index)=>{
+bullet.x += bullet.speed;
+
+/* Collision */
+if(
+bullet.x > dragon.x &&
+bullet.x < dragon.x + dragon.width &&
+bullet.y > dragon.y &&
+bullet.y < dragon.y + dragon.height
+){
+dragon.hp -= 10;
+projectiles.splice(index,1);
 
 if(dragon.hp <= 0){
 dragon.hp = 0;
-setTimeout(()=>{
-showVictory();
-},500);
+setTimeout(()=>showVictory(),500);
 }
 }
-}
+});
 
-/* ================= */
-/* DRAW HERO (CUTE PRINCESS SHAPE) */
-/* ================= */
-
-function drawHero(){
-ctx.fillStyle = "#ff66cc";
-ctx.beginPath();
-ctx.arc(hero.x + hero.width/2,
-hero.y + 40,
-40,
-0,
-Math.PI*2);
-ctx.fill();
-
-/* body */
-ctx.fillRect(hero.x,
-hero.y + 40,
-hero.width,
-hero.height - 40);
 }
 
 /* ================= */
-/* DRAW DRAGON */
+/* DRAW */
 /* ================= */
 
-function drawDragon(){
-if(dragon.hp <= 0) return;
+function draw(){
 
-ctx.fillStyle = "#9933ff";
-ctx.beginPath();
-ctx.arc(dragon.x + 75,
-dragon.y + 75,
-75,
-0,
-Math.PI*2);
-ctx.fill();
+ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* hp bar above dragon */
+/* Background */
+ctx.fillStyle="#1e1e2f";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+/* HERO */
+ctx.fillStyle="#ff66cc";
+ctx.fillRect(hero.x,hero.y,hero.width,hero.height);
+
+/* Dragon */
+if(dragon.hp > 0){
+ctx.fillStyle="#9933ff";
+ctx.fillRect(dragon.x,dragon.y,dragon.width,dragon.height);
+
+/* Dragon HP */
 ctx.fillStyle="red";
-ctx.fillRect(dragon.x,
-dragon.y - 20,
-150,
-10);
+ctx.fillRect(dragon.x,dragon.y-20,120,10);
 
 ctx.fillStyle="lime";
-ctx.fillRect(dragon.x,
-dragon.y - 20,
-dragon.hp/100 * 150,
-10);
+ctx.fillRect(dragon.x,dragon.y-20,dragon.hp/100*120,10);
+}
+
+/* Projectiles */
+ctx.fillStyle="yellow";
+projectiles.forEach(b=>{
+ctx.beginPath();
+ctx.arc(b.x,b.y,8,0,Math.PI*2);
+ctx.fill();
+});
+
+/* HP BAR */
+document.getElementById("hpFill")
+.style.width = dragon.hp + "%";
+
 }
 
 /* ================= */
 /* GAME LOOP */
 /* ================= */
 
-function update(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-ctx.fillStyle="#2c3e50";
-ctx.fillRect(0,0,canvas.width,canvas.height);
-
-drawHero();
-drawDragon();
-
-document.getElementById("hpFill").style.width = dragon.hp + "%";
-
-requestAnimationFrame(update);
+function loop(){
+update();
+draw();
+requestAnimationFrame(loop);
 }
 
-update();
+loop();
 
 /* ================= */
 /* WIN SCREEN */
@@ -196,9 +223,10 @@ document.body.innerHTML = `
 <div style="color:white;text-align:center;margin-top:200px;">
 <h1>🐉 Dragon Defeated!</h1>
 <h2>Happy Birthday Ismayanti ❤️</h2>
-<p>You saved your kingdom.</p>
+<p>Level Completed.</p>
 </div>
 `;
+
 }
 
 </script>
