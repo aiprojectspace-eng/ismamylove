@@ -1,205 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Quest of My Heart - Ismayanti Baizura</title>
+<title>Ismayanti Hero Quest</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-body {
-    margin:0;
-    font-family: 'Comic Sans MS', cursive;
-    background: linear-gradient(to bottom, #ffd6ec, #e6ccff);
-    text-align:center;
-    color:#5a2d82;
+body{
+  margin:0;
+  overflow:hidden;
+  background:#1e1e2f;
+  touch-action:none;
 }
-
-.screen {
-    display:none;
-    padding:40px;
+canvas{
+  display:block;
 }
-
-button {
-    background:#ff99cc;
-    border:none;
-    padding:12px 20px;
-    border-radius:20px;
-    font-size:16px;
-    margin:10px;
-    cursor:pointer;
+#ui{
+  position:absolute;
+  top:10px;
+  left:10px;
+  color:white;
+  font-family:sans-serif;
+  z-index:10;
 }
-
-button:hover {
-    background:#ff66b2;
+.bar{
+  width:150px;
+  height:15px;
+  background:#444;
+  margin-bottom:5px;
+  border-radius:10px;
+  overflow:hidden;
 }
-
-#startScreen {
-    display:block;
+.fill{
+  height:100%;
 }
-
-.map-location {
-    display:block;
-    margin:15px;
-    font-size:18px;
-}
-
-#loveBar {
-    width:300px;
-    height:20px;
-    background:#fff;
-    margin:20px auto;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-#loveFill {
-    height:100%;
-    width:0%;
-    background:#ff66b2;
-}
-
-.hpbar {
-    width:300px;
-    height:20px;
-    background:#fff;
-    margin:10px auto;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-.hpfill {
-    height:100%;
-    width:100%;
-    background:#ff4d4d;
-}
-
-.character {
-    font-size:80px;
-}
-
+#heroFill{ background:#ff66b2;}
+#dragonFill{ background:#ff3333;}
 </style>
 </head>
 <body>
 
-<!-- START SCREEN -->
-<div id="startScreen" class="screen">
-    <h1>💖 Quest of My Heart 💖</h1>
-    <h2>Hero: Ismayanti Baizura</h2>
-    <p>Your mission: Save your husband from the Lonely Tower 🏰</p>
-    <button onclick="showScreen('mapScreen')">Start Adventure</button>
+<div id="ui">
+  ❤️ Hero HP
+  <div class="bar"><div id="heroFill" class="fill"></div></div>
+  🐉 Dragon HP
+  <div class="bar"><div id="dragonFill" class="fill"></div></div>
 </div>
 
-<!-- MAP -->
-<div id="mapScreen" class="screen">
-    <h2>🌸 World Map 🌸</h2>
-    <div id="loveBar"><div id="loveFill"></div></div>
-    <p>Love Points: <span id="lovePoints">0</span>/100</p>
-
-    <button class="map-location" onclick="showScreen('forestScreen')">🌳 Forest of Memories</button>
-    <button class="map-location" onclick="showScreen('dragonScreen')">🐉 Dragon Field</button>
-    <button class="map-location" onclick="enterTower()">🏰 Lonely Tower</button>
-</div>
-
-<!-- FOREST QUIZ -->
-<div id="forestScreen" class="screen">
-    <h2>🌳 Forest of Memories</h2>
-    <p>Who confessed first?</p>
-    <button onclick="correctAnswer()">Abang 😎</button>
-    <button onclick="wrongAnswer()">You 💅</button>
-    <button onclick="wrongAnswer()">Both shy 😂</button>
-    <br><br>
-    <button onclick="showScreen('mapScreen')">Back to Map</button>
-</div>
-
-<!-- DRAGON BATTLE -->
-<div id="dragonScreen" class="screen">
-    <h2>🐉 The Aging Dragon Appears!</h2>
-    <div class="character">🐲</div>
-    <div class="hpbar"><div id="dragonHP" class="hpfill"></div></div>
-    <p>Dragon HP: <span id="dragonHPText">100</span></p>
-    <button onclick="attack()">⚔️ Attack</button>
-    <button onclick="loveBlast()">💖 Love Blast</button>
-    <br><br>
-    <button onclick="showScreen('mapScreen')">Retreat</button>
-</div>
-
-<!-- TOWER -->
-<div id="towerScreen" class="screen">
-    <h2>🏰 Lonely Tower</h2>
-    <div class="character">🤴</div>
-    <p>"I knew only my hero could save me..."</p>
-    <h2>💖 Happy Birthday Ismayanti Baizura 💖</h2>
-    <p>5 March — The day the world received its greatest blessing.</p>
-    <p>
-        Thank you for being my strength, my happiness,  
-        my forever adventure partner.  
-        Every dragon we fight, we fight together.  
-        I love you always.
-    </p>
-</div>
+<canvas id="game"></canvas>
 
 <script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-let lovePoints = 0;
-let dragonHP = 100;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-function showScreen(id) {
-    let screens = document.getElementsByClassName("screen");
-    for (let i = 0; i < screens.length; i++) {
-        screens[i].style.display = "none";
+let hero = {
+  x:100,
+  y:canvas.height/2,
+  size:25,
+  speed:3,
+  hp:100
+};
+
+let dragon = {
+  x:canvas.width-120,
+  y:canvas.height/2,
+  size:60,
+  hp:250,
+  direction:1
+};
+
+let bullets = [];
+let fireballs = [];
+
+let joystick = {
+  active:false,
+  startX:0,
+  startY:0,
+  dx:0,
+  dy:0
+};
+
+canvas.addEventListener("touchstart", e=>{
+  const touch = e.touches[0];
+  if(touch.clientX < canvas.width/2){
+    joystick.active = true;
+    joystick.startX = touch.clientX;
+    joystick.startY = touch.clientY;
+  }else{
+    shoot();
+  }
+});
+
+canvas.addEventListener("touchmove", e=>{
+  if(!joystick.active) return;
+  const touch = e.touches[0];
+  joystick.dx = touch.clientX - joystick.startX;
+  joystick.dy = touch.clientY - joystick.startY;
+});
+
+canvas.addEventListener("touchend", ()=>{
+  joystick.active = false;
+  joystick.dx = 0;
+  joystick.dy = 0;
+});
+
+function shoot(){
+  let angle = Math.atan2(dragon.y-hero.y, dragon.x-hero.x);
+  bullets.push({
+    x:hero.x,
+    y:hero.y,
+    dx:Math.cos(angle)*6,
+    dy:Math.sin(angle)*6,
+    size:6
+  });
+}
+
+function dragonShoot(){
+  let angle = Math.atan2(hero.y-dragon.y, hero.x-dragon.x);
+  fireballs.push({
+    x:dragon.x,
+    y:dragon.y,
+    dx:Math.cos(angle)*3,
+    dy:Math.sin(angle)*3,
+    size:10
+  });
+}
+setInterval(dragonShoot,1800);
+
+function update(){
+
+  // Joystick movement
+  hero.x += joystick.dx * 0.02;
+  hero.y += joystick.dy * 0.02;
+
+  // Keep in screen
+  hero.x = Math.max(hero.size, Math.min(canvas.width-hero.size, hero.x));
+  hero.y = Math.max(hero.size, Math.min(canvas.height-hero.size, hero.y));
+
+  // Dragon simple movement
+  dragon.y += dragon.direction * 1.5;
+  if(dragon.y < 100 || dragon.y > canvas.height-100){
+    dragon.direction *= -1;
+  }
+
+  bullets.forEach((b,i)=>{
+    b.x += b.dx;
+    b.y += b.dy;
+
+    if(Math.hypot(b.x-dragon.x,b.y-dragon.y) < dragon.size){
+      dragon.hp -= 10;
+      bullets.splice(i,1);
     }
-    document.getElementById(id).style.display = "block";
-}
+  });
 
-function addLove(points) {
-    lovePoints += points;
-    if(lovePoints > 100) lovePoints = 100;
-    document.getElementById("lovePoints").innerText = lovePoints;
-    document.getElementById("loveFill").style.width = lovePoints + "%";
-}
+  fireballs.forEach((f,i)=>{
+    f.x += f.dx;
+    f.y += f.dy;
 
-function correctAnswer() {
-    alert("Correct! +30 Love Points 💖");
-    addLove(30);
-}
-
-function wrongAnswer() {
-    alert("Hehehe wrong answer 😜");
-}
-
-function attack() {
-    dragonHP -= 20;
-    updateDragon();
-}
-
-function loveBlast() {
-    if(lovePoints >= 50) {
-        dragonHP -= 40;
-        alert("Super Love Blast! 💖✨");
-    } else {
-        alert("Not enough Love Points!");
+    if(Math.hypot(f.x-hero.x,f.y-hero.y) < hero.size){
+      hero.hp -= 10;
+      fireballs.splice(i,1);
     }
-    updateDragon();
+  });
+
+  if(hero.hp <= 0){
+    alert("Hero fainted 💔 Try again!");
+    location.reload();
+  }
+
+  if(dragon.hp <= 0){
+    winGame();
+  }
+
+  document.getElementById("heroFill").style.width = hero.hp + "%";
+  document.getElementById("dragonFill").style.width = dragon.hp/2.5 + "%";
 }
 
-function updateDragon() {
-    if(dragonHP <= 0) {
-        dragonHP = 0;
-        alert("Dragon defeated! It turned into a birthday cake! 🎂");
-        addLove(50);
-        showScreen('mapScreen');
-    }
-    document.getElementById("dragonHP").style.width = dragonHP + "%";
-    document.getElementById("dragonHPText").innerText = dragonHP;
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // Hero
+  ctx.fillStyle="#ff99cc";
+  ctx.beginPath();
+  ctx.arc(hero.x,hero.y,hero.size,0,Math.PI*2);
+  ctx.fill();
+
+  // Dragon
+  ctx.fillStyle="#9933ff";
+  ctx.beginPath();
+  ctx.arc(dragon.x,dragon.y,dragon.size,0,Math.PI*2);
+  ctx.fill();
+
+  // Bullets
+  ctx.fillStyle="#ff66b2";
+  bullets.forEach(b=>{
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,b.size,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // Fireballs
+  ctx.fillStyle="orange";
+  fireballs.forEach(f=>{
+    ctx.beginPath();
+    ctx.arc(f.x,f.y,f.size,0,Math.PI*2);
+    ctx.fill();
+  });
 }
 
-function enterTower() {
-    if(lovePoints >= 100) {
-        showScreen('towerScreen');
-    } else {
-        alert("You need 100 Love Points to enter the Tower 💔");
-    }
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
 }
 
+function winGame(){
+  document.body.innerHTML = `
+  <div style="text-align:center;margin-top:100px;color:white;font-family:sans-serif;">
+    <h1>🏰 Tower Unlocked!</h1>
+    <h2>Ismayanti Baizura, you saved your husband 💖</h2>
+    <p style="max-width:600px;margin:auto;font-size:18px;">
+    5 March — My hero was born.
+    Every year you grow stronger, more beautiful,
+    and more powerful than any dragon.
+    I love you forever.
+    Happy Birthday My Warrior Queen 💕
+    </p>
+  </div>`;
+}
+
+loop();
 </script>
-
 </body>
 </html>
