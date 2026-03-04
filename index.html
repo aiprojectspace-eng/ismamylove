@@ -47,8 +47,10 @@ font-weight:bold;
 <div id="joy"></div>
 <button id="attack">⚔️</button>
 
-<!-- ✅ THREE FROM CDN (NO MODULE ERROR) -->
+<!-- ✅ THREE -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
+
+<!-- ✅ GLTF LOADER -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160/examples/js/loaders/GLTFLoader.js"></script>
 
 <script>
@@ -73,14 +75,12 @@ renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
 /* LIGHT */
-
 const light = new THREE.DirectionalLight(0xffffff,1);
 light.position.set(10,20,10);
 light.castShadow = true;
 scene.add(light);
 
 /* FLOOR */
-
 const floor = new THREE.Mesh(
 new THREE.PlaneGeometry(200,200),
 new THREE.MeshStandardMaterial({color:0x55aa55})
@@ -95,7 +95,7 @@ camera.position.set(0,5,12);
 /* LOAD MODELS */
 /* ===================== */
 
-const loader = new THREE.GLTFLoader();
+const loader = new GLTFLoader(); // ✅ IMPORTANT FIX
 
 let hero = null;
 let dragon = null;
@@ -126,7 +126,7 @@ if(child.isMesh) child.castShadow = true;
 scene.add(dragon);
 });
 
-/* ENV OPTIONAL */
+/* ENV */
 loader.load("./environment.glb",(glb)=>{
 let env = glb.scene;
 env.scale.set(5,5,5);
@@ -189,7 +189,7 @@ renderer.render(scene,camera);
 
 animate();
 
-/* RESIZE */
+/* RESIZE FIX */
 
 window.addEventListener("resize",()=>{
 camera.aspect = window.innerWidth/window.innerHeight;
