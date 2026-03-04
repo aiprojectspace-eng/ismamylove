@@ -43,20 +43,170 @@ font-size:20px;
 font-weight:bold;
 }
 </style>
-
 </head>
 <body>
 
-<!-- UI -->
 <div id="joy"></div>
 <button id="attack">⚔️</button>
 
-<!-- THREE JS -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160/examples/js/loaders/GLTFLoader.js"></script>
+<script type="module">
 
-<!-- GAME LOGIC -->
-<script src="./game.js"></script>
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
+import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/loaders/GLTFLoader.js";
+
+/* ===================== */
+/* BASIC SETUP */
+/* ===================== */
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+
+const camera = new THREE.PerspectiveCamera(
+70,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
+);
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+/* LIGHT */
+
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(10,20,10);
+light.castShadow = true;
+scene.add(light);
+
+/* FLOOR */
+
+const floor = new THREE.Mesh(
+new THREE.PlaneGeometry(200,200),
+new THREE.MeshStandardMaterial({color:0x55aa55})
+);
+floor.rotation.x = -Math.PI/2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+camera.position.set(0,5,12);
+
+/* ===================== */
+/* LOAD MODELS */
+/* ===================== */
+
+const loader = new GLTFLoader();
+
+let hero = null;
+let dragon = null;
+
+/* HERO */
+loader.load("./hero.glb",(glb)=>{
+hero = glb.scene;
+hero.scale.set(1.5,1.5,1.5);
+hero.position.set(0,0,0);
+
+hero.traverse(child=>{
+if(child.isMesh) child.castShadow = true;
+});
+
+scene.add(hero);
+},
+undefined,
+(error)=>{
+console.error("Hero load error:",error);
+});
+
+/* DRAGON */
+loader.load("./dragon.glb",(glb)=>{
+dragon = glb.scene;
+dragon.scale.set(2,2,2);
+dragon.position.set(6,0,0);
+
+dragon.traverse(child=>{
+if(child.isMesh) child.castShadow = true;
+});
+
+scene.add(dragon);
+},
+undefined,
+(error)=>{
+console.error("Dragon load error:",error);
+});
+
+/* ENVIRONMENT OPTIONAL */
+loader.load("./environment.glb",(glb)=>{
+let env = glb.scene;
+env.scale.set(5,5,5);
+scene.add(env);
+});
+
+/* ===================== */
+/* CONTROLS */
+/* ===================== */
+
+let moveX = 0;
+let moveZ = 0;
+
+document.getElementById("joy")
+.addEventListener("touchmove",(e)=>{
+let touch = e.touches[0];
+moveX = (touch.clientX - window.innerWidth/2) * 0.001;
+moveZ = (touch.clientY - window.innerHeight/2) * 0.001;
+});
+
+document.getElementById("joy")
+.addEventListener("touchend",()=>{
+moveX = 0;
+moveZ = 0;
+});
+
+/* ATTACK */
+
+document.getElementById("attack")
+.addEventListener("touchstart",()=>{
+if(hero && dragon){
+let dist = hero.position.distanceTo(dragon.position);
+
+if(dist < 4){
+scene.remove(dragon);
+dragon = null;
+alert("🐉 Dragon Defeated!");
+}
+}
+});
+
+/* ===================== */
+/* GAME LOOP */
+/* ===================== */
+
+function animate(){
+requestAnimationFrame(animate);
+
+if(hero){
+hero.position.x += moveX;
+hero.position.z += moveZ;
+
+camera.position.x = hero.position.x;
+camera.position.z = hero.position.z + 12;
+camera.lookAt(hero.position);
+}
+
+renderer.render(scene,camera);
+}
+
+animate();
+
+/* RESIZE FIX */
+
+window.addEventListener("resize",()=>{
+camera.aspect = window.innerWidth/window.innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+</script>
 
 </body>
 </html>
