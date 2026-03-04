@@ -47,14 +47,14 @@ font-weight:bold;
 <div id="joy"></div>
 <button id="attack">⚔️</button>
 
-<!-- ✅ MODULE VERSION (FIX LOADER ERROR) -->
+<!-- ✅ FIXED MODULE IMPORT (NO "three" ERROR) -->
 <script type="module">
 
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
-import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/loaders/GLTFLoader.js";
+import * as THREE from "https://esm.sh/three@0.160.0";
+import { GLTFLoader } from "https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
 
 /* ===================== */
-/* BASIC SETUP */
+/* SETUP */
 /* ===================== */
 
 const scene = new THREE.Scene();
