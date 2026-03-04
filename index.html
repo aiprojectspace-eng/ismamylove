@@ -3,19 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti RPG 2D Pro</title>
+<title>Ismayanti RPG 2D Improved</title>
 
 <style>
 body{
 margin:0;
 overflow:hidden;
-background:#111;
+background:#0f0f1a;
 touch-action:none;
 font-family:Arial;
+color:white;
 }
 
 canvas{
 display:block;
+}
+
+#ui{
+position:absolute;
+top:20px;
+left:20px;
+}
+
+.bar{
+width:250px;
+height:18px;
+background:red;
+margin-bottom:10px;
+}
+
+.bar-inner{
+height:100%;
+background:lime;
 }
 
 #attackBtn{
@@ -31,26 +50,18 @@ color:white;
 font-size:18px;
 font-weight:bold;
 }
-
-#hpBar{
-position:absolute;
-top:20px;
-left:20px;
-width:250px;
-height:20px;
-background:red;
-}
-
-#hpFill{
-height:100%;
-width:100%;
-background:lime;
-}
 </style>
 </head>
 <body>
 
-<div id="hpBar"><div id="hpFill"></div></div>
+<div id="ui">
+<div>PLAYER HP</div>
+<div class="bar"><div id="playerHP" class="bar-inner"></div></div>
+
+<div>DRAGON HP</div>
+<div class="bar"><div id="dragonHP" class="bar-inner"></div></div>
+</div>
+
 <button id="attackBtn">⚔️</button>
 
 <canvas id="game"></canvas>
@@ -67,13 +78,14 @@ canvas.height = window.innerHeight;
 /* GAME OBJECTS */
 /* ================= */
 
-const hero = {
+const player = {
 x:100,
 y:canvas.height-200,
 width:60,
 height:80,
-speed:5,
-cooldown:0
+hp:100,
+speed:4,
+attackCooldown:0
 };
 
 const dragon = {
@@ -83,79 +95,115 @@ width:120,
 height:120,
 hp:100,
 speed:2,
-direction:-1
+attackCooldown:0
 };
 
-let projectiles = [];
+let bullets = [];
 
 /* ================= */
+/* CONTROLS */
+/* ================= */
+
+let keys = {};
+
+window.addEventListener("keydown",e=>{
+keys[e.key] = true;
+});
+
+window.addEventListener("keyup",e=>{
+keys[e.key] = false;
+});
+
 /* TOUCH MOVE */
-/* ================= */
-
 canvas.addEventListener("touchmove",(e)=>{
 let touch = e.touches[0];
-hero.x = touch.clientX - hero.width/2;
+player.x = touch.clientX - player.width/2;
 });
 
-/* ================= */
-/* ATTACK SYSTEM (WITH COOLDOWN) */
-/* ================= */
-
+/* ATTACK BUTTON */
 document.getElementById("attackBtn")
 .addEventListener("touchstart",()=>{
-if(hero.cooldown <= 0){
 shoot();
-hero.cooldown = 30;
-}
 });
 
+/* ================= */
+/* COMBAT */
+/* ================= */
+
 function shoot(){
-projectiles.push({
-x:hero.x + hero.width,
-y:hero.y + 30,
-speed:8
+if(player.attackCooldown > 0) return;
+
+bullets.push({
+x:player.x + player.width,
+y:player.y + 30,
+speed:10
 });
+
+player.attackCooldown = 20;
+}
+
+/* Dragon attack */
+function dragonAttack(){
+if(dragon.attackCooldown > 0) return;
+
+if(Math.abs(player.x - dragon.x) < 200){
+
+player.hp -= 10;
+dragon.attackCooldown = 60;
+}
 }
 
 /* ================= */
-/* UPDATE GAME LOGIC */
+/* UPDATE LOGIC */
 /* ================= */
 
 function update(){
 
-/* Hero cooldown */
-if(hero.cooldown > 0){
-hero.cooldown--;
-}
+/* Player movement */
+if(keys["a"]) player.x -= player.speed;
+if(keys["d"]) player.x += player.speed;
+
+if(player.attackCooldown > 0)
+player.attackCooldown--;
 
 /* Dragon AI movement */
-dragon.x += dragon.speed * dragon.direction;
+dragon.x += dragon.speed;
 
-if(dragon.x < canvas.width/2 || dragon.x > canvas.width-150){
-dragon.direction *= -1;
+if(dragon.x > canvas.width - 100 || dragon.x < canvas.width/2){
+dragon.speed *= -1;
 }
 
-/* Projectile movement */
-projectiles.forEach((bullet,index)=>{
-bullet.x += bullet.speed;
+/* Dragon attack timer */
+if(dragon.attackCooldown > 0)
+dragon.attackCooldown--;
+
+dragonAttack();
+
+/* Bullet collision */
+bullets.forEach((b,index)=>{
+b.x += b.speed;
 
 /* Collision */
 if(
-bullet.x > dragon.x &&
-bullet.x < dragon.x + dragon.width &&
-bullet.y > dragon.y &&
-bullet.y < dragon.y + dragon.height
+b.x > dragon.x &&
+b.x < dragon.x + dragon.width &&
+b.y > dragon.y &&
+b.y < dragon.y + dragon.height
 ){
 dragon.hp -= 10;
-projectiles.splice(index,1);
+bullets.splice(index,1);
 
 if(dragon.hp <= 0){
 dragon.hp = 0;
-setTimeout(()=>showVictory(),500);
+setTimeout(()=>winScreen(),500);
 }
 }
 });
 
+/* Player death */
+if(player.hp <= 0){
+loseScreen();
+}
 }
 
 /* ================= */
@@ -167,38 +215,33 @@ function draw(){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
 /* Background */
-ctx.fillStyle="#1e1e2f";
+ctx.fillStyle="#1a1a2e";
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
-/* HERO */
+/* Player */
 ctx.fillStyle="#ff66cc";
-ctx.fillRect(hero.x,hero.y,hero.width,hero.height);
+ctx.fillRect(player.x,player.y,player.width,player.height);
 
 /* Dragon */
 if(dragon.hp > 0){
 ctx.fillStyle="#9933ff";
 ctx.fillRect(dragon.x,dragon.y,dragon.width,dragon.height);
-
-/* Dragon HP */
-ctx.fillStyle="red";
-ctx.fillRect(dragon.x,dragon.y-20,120,10);
-
-ctx.fillStyle="lime";
-ctx.fillRect(dragon.x,dragon.y-20,dragon.hp/100*120,10);
 }
 
-/* Projectiles */
+/* Bullets */
 ctx.fillStyle="yellow";
-projectiles.forEach(b=>{
+bullets.forEach(b=>{
 ctx.beginPath();
 ctx.arc(b.x,b.y,8,0,Math.PI*2);
 ctx.fill();
 });
 
-/* HP BAR */
-document.getElementById("hpFill")
-.style.width = dragon.hp + "%";
+/* UI Bars */
+document.getElementById("playerHP")
+.style.width = player.hp + "%";
 
+document.getElementById("dragonHP")
+.style.width = dragon.hp + "%";
 }
 
 /* ================= */
@@ -214,19 +257,26 @@ requestAnimationFrame(loop);
 loop();
 
 /* ================= */
-/* WIN SCREEN */
+/* WIN / LOSE SCREEN */
 /* ================= */
 
-function showVictory(){
-
+function winScreen(){
 document.body.innerHTML = `
-<div style="color:white;text-align:center;margin-top:200px;">
+<div style="text-align:center;margin-top:200px;">
 <h1>🐉 Dragon Defeated!</h1>
 <h2>Happy Birthday Ismayanti ❤️</h2>
-<p>Level Completed.</p>
+<p>You protected your kingdom.</p>
 </div>
 `;
+}
 
+function loseScreen(){
+document.body.innerHTML = `
+<div style="text-align:center;margin-top:200px;color:red;">
+<h1>💀 You Died</h1>
+<p>Try again warrior.</p>
+</div>
+`;
 }
 
 </script>
