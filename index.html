@@ -1,297 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Chibi Fight</title>
-
-<style>
-body{
-margin:0;
-overflow:hidden;
-background:#000;
-touch-action:none;
-font-family:Arial;
-}
-
-canvas{
-display:block;
-}
-
-#attackBtn{
-position:absolute;
-right:30px;
-bottom:40px;
-width:100px;
-height:100px;
-border-radius:50%;
-border:none;
-background:red;
-color:white;
-font-size:20px;
-font-weight:bold;
-}
-
-.ui{
-position:absolute;
-top:20px;
-left:20px;
-color:white;
-}
-
-.bar{
-width:250px;
-height:20px;
-background:red;
-margin-bottom:10px;
-}
-
-.bar-inner{
-height:100%;
-background:lime;
-width:100%;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday Sayang!</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #333; font-family: 'Arial', sans-serif; touch-action: none; }
+        canvas { display: block; background: #555; margin: 0 auto; }
+        #ui { position: absolute; top: 10px; left: 10px; color: white; font-size: 20px; font-weight: bold; text-shadow: 2px 2px 4px #000; pointer-events: none; }
+        #overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white; text-align: center; padding: 20px; box-sizing: border-box;
+        }
+        button { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #ff4757; color: white; border: none; border-radius: 50px; margin-top: 20px; }
+        .hidden { display: none !important; }
+        h1 { color: #ff4757; margin-bottom: 10px; }
+    </style>
 </head>
 <body>
 
-<div class="ui">
-<div>PLAYER</div>
-<div class="bar"><div id="playerHP" class="bar-inner"></div></div>
+    <div id="ui">Score: <span id="score">0</span> / 10</div>
 
-<div>ENEMY</div>
-<div class="bar"><div id="enemyHP" class="bar-inner"></div></div>
-</div>
+    <div id="overlay">
+        <h1 id="msg-title">Road to Your Heart 🏎️</h1>
+        <p id="msg-p">Sayang, tap KIRI atau KANAN skrin untuk gerakkan kereta. Kutip 10 'LOVE' untuk hadiah!</p>
+        <button onclick="startGame()">START GAME</button>
+    </div>
 
-<button id="attackBtn">⚔</button>
+    <canvas id="gameCanvas"></canvas>
 
-<canvas id="game"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const overlay = document.getElementById('overlay');
+        const msgTitle = document.getElementById('msg-title');
+        const msgP = document.getElementById('msg-p');
 
-<script>
+        let gameRunning = false;
+        let score = 0;
+        let car = { x: 0, y: 0, w: 50, h: 80, lane: 1 };
+        let items = [];
+        let speed = 5;
+        let frame = 0;
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+        // Resize canvas to mobile screen
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            car.y = canvas.height - 120;
+            updateCarPos();
+        }
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+        function updateCarPos() {
+            const laneWidth = canvas.width / 3;
+            car.x = (car.lane * laneWidth) + (laneWidth / 2) - (car.w / 2);
+        }
 
-/* ================= */
-/* LOAD SPRITE */
-/* ================= */
+        window.addEventListener('resize', resize);
+        resize();
 
-const sprite = new Image();
-sprite.src = "player.png";
+        // Touch Controls
+        window.addEventListener('touchstart', (e) => {
+            if (!gameRunning) return;
+            const touchX = e.touches[0].clientX;
+            if (touchX < canvas.width / 2) {
+                if (car.lane > 0) car.lane--;
+            } else {
+                if (car.lane < 2) car.lane++;
+            }
+            updateCarPos();
+        });
 
-/*
-ASSUMPTION:
-Sprite sheet grid = 4 columns
-Frame size = 256 x 256
-*/
+        function spawnItem() {
+            const lane = Math.floor(Math.random() * 3);
+            const isGood = Math.random() > 0.3; // 70% chance good item
+            items.push({
+                lane: lane,
+                y: -100,
+                type: isGood ? '❤️' : '❌',
+                isGood: isGood
+            });
+        }
 
-const frameWidth = 256;
-const frameHeight = 256;
+        function startGame() {
+            score = 0;
+            items = [];
+            gameRunning = true;
+            overlay.classList.add('hidden');
+            scoreEl.innerText = score;
+            animate();
+        }
 
-let frameX = 0;
-let frameY = 0;
-let frameTimer = 0;
+        function endGame() {
+            gameRunning = false;
+            overlay.classList.remove('hidden');
+            msgTitle.innerText = "HAPPY BIRTHDAY SAYANG! 🎂";
+            msgP.innerText = "You've reached my heart! I love you so much. ❤️\n\n(Insert your personal message here)";
+            document.querySelector('button').innerText = "Play Again";
+        }
 
-/* ================= */
-/* PLAYER DATA */
-/* ================= */
+        function animate() {
+            if (!gameRunning) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-const player = {
-x:150,
-y:canvas.height-300,
-hp:100,
-state:"idle",
-cooldown:0,
-facing:1
-};
+            // Draw Lanes
+            ctx.strokeStyle = "rgba(255,255,255,0.2)";
+            ctx.setLineDash([20, 20]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width/3, 0); ctx.lineTo(canvas.width/3, canvas.height);
+            ctx.moveTo(2*canvas.width/3, 0); ctx.lineTo(2*canvas.width/3, canvas.height);
+            ctx.stroke();
 
-const enemy = {
-x:canvas.width-300,
-y:canvas.height-300,
-hp:100,
-speed:2,
-direction:-1
-};
+            // Draw Car (Simple Box with Emoji)
+            ctx.font = "50px Arial";
+            ctx.fillText("🏎️", car.x, car.y + 50);
 
-let keys = {};
+            // Update & Draw Items
+            if (frame % 60 === 0) spawnItem();
+            
+            for (let i = items.length - 1; i >= 0; i--) {
+                let it = items[i];
+                it.y += speed;
+                const laneWidth = canvas.width / 3;
+                let itemX = (it.lane * laneWidth) + (laneWidth / 2) - 20;
+                
+                ctx.fillText(it.type, itemX, it.y);
 
-/* ================= */
-/* CONTROLS */
-/* ================= */
+                // Collision Detection
+                if (it.y > car.y && it.y < car.y + car.h && it.lane === car.lane) {
+                    if (it.isGood) {
+                        score++;
+                        scoreEl.innerText = score;
+                        items.splice(i, 1);
+                        if (score >= 10) endGame();
+                    } else {
+                        score = Math.max(0, score - 1);
+                        scoreEl.innerText = score;
+                        items.splice(i, 1);
+                    }
+                }
 
-window.addEventListener("keydown",(e)=>{
-keys[e.key] = true;
-});
+                if (it.y > canvas.height) items.splice(i, 1);
+            }
 
-window.addEventListener("keyup",(e)=>{
-keys[e.key] = false;
-});
-
-document.getElementById("attackBtn")
-.addEventListener("touchstart",()=>{
-attack();
-});
-
-/* ================= */
-/* ATTACK SYSTEM */
-/* ================= */
-
-function attack(){
-
-if(player.cooldown > 0) return;
-
-player.state = "attack";
-player.cooldown = 30;
-
-if(Math.abs(player.x - enemy.x) < 250){
-enemy.hp -= 10;
-if(enemy.hp <= 0){
-enemy.hp = 0;
-enemy.state = "dead";
-}
-}
-}
-
-/* ================= */
-/* UPDATE */
-/* ================= */
-
-function update(){
-
-/* Movement */
-if(keys["a"]){
-player.x -= 5;
-player.state = "walk";
-player.facing = -1;
-}
-
-if(keys["d"]){
-player.x += 5;
-player.state = "walk";
-player.facing = 1;
-}
-
-if(!keys["a"] && !keys["d"] && player.state !== "attack"){
-player.state = "idle";
-}
-
-/* Cooldown */
-if(player.cooldown > 0)
-player.cooldown--;
-
-/* Enemy AI */
-enemy.x += enemy.speed * enemy.direction;
-
-if(enemy.x < canvas.width/2 || enemy.x > canvas.width - 200){
-enemy.direction *= -1;
-}
-
-/* Enemy Attack */
-if(Math.abs(enemy.x - player.x) < 200){
-player.hp -= 0.05;
-}
-
-if(player.hp <= 0){
-player.hp = 0;
-player.state = "dead";
-}
-
-}
-
-/* ================= */
-/* ANIMATION SYSTEM */
-/* ================= */
-
-function animateSprite(state){
-
-/*
-Frame Layout:
-Row 0 = idle
-Row 1 = walk
-Row 2 = attack
-Row 3 = dead
-*/
-
-if(state === "idle") frameY = 0;
-if(state === "walk") frameY = 1;
-if(state === "attack") frameY = 2;
-if(state === "dead") frameY = 3;
-
-/* Frame animation */
-frameTimer++;
-
-if(frameTimer > 10){
-frameX++;
-frameTimer = 0;
-}
-
-/* Loop 4 columns */
-if(frameX > 3){
-frameX = 0;
-}
-
-ctx.save();
-ctx.translate(player.x,player.y);
-ctx.scale(player.facing,1);
-
-ctx.drawImage(
-sprite,
-frameX * frameWidth,
-frameY * frameHeight,
-frameWidth,
-frameHeight,
--frameWidth/2,
--frameHeight/2,
-frameWidth,
-frameHeight
-);
-
-ctx.restore();
-
-}
-
-/* ================= */
-/* DRAW */
-/* ================= */
-
-function draw(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height);
-ctx.fillStyle="#1a1a1a";
-ctx.fillRect(0,0,canvas.width,canvas.height);
-
-/* Draw Player Animation */
-animateSprite(player.state);
-
-/* Draw Enemy */
-ctx.fillStyle="purple";
-ctx.fillRect(enemy.x,enemy.y,150,150);
-
-/* HP UI */
-document.getElementById("playerHP")
-.style.width = player.hp + "%";
-
-document.getElementById("enemyHP")
-.style.width = enemy.hp + "%";
-
-}
-
-/* ================= */
-/* LOOP */
-/* ================= */
-
-function loop(){
-update();
-draw();
-requestAnimationFrame(loop);
-}
-
-loop();
-
-</script>
-
+            frame++;
+            requestAnimationFrame(animate);
+        }
+    </script>
 </body>
 </html>
