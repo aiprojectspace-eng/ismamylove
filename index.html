@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ismayanti 3D RPG</title>
+<title>Ismayanti 2D RPG</title>
 
 <style>
 body{
 margin:0;
 overflow:hidden;
-background:black;
+background:#111;
+font-family:Arial;
 touch-action:none;
 }
 
@@ -17,17 +18,7 @@ canvas{
 display:block;
 }
 
-#joy{
-position:absolute;
-left:30px;
-bottom:40px;
-width:120px;
-height:120px;
-border-radius:50%;
-background:rgba(255,255,255,0.2);
-}
-
-#attack{
+#attackBtn{
 position:absolute;
 right:30px;
 bottom:40px;
@@ -37,163 +28,158 @@ border-radius:50%;
 border:none;
 background:#ff4da6;
 color:white;
-font-size:20px;
+font-size:18px;
 font-weight:bold;
+}
+
+#hpBar{
+position:absolute;
+top:20px;
+left:20px;
+width:200px;
+height:20px;
+background:red;
+}
+
+#hpFill{
+height:100%;
+width:100%;
+background:lime;
 }
 </style>
 </head>
 <body>
 
-<div id="joy"></div>
-<button id="attack">⚔️</button>
+<div id="hpBar"><div id="hpFill"></div></div>
+<button id="attackBtn">⚔️</button>
 
-<!-- ✅ FIXED MODULE IMPORT (NO "three" ERROR) -->
-<script type="module">
+<canvas id="game"></canvas>
 
-import * as THREE from "https://esm.sh/three@0.160.0";
-import { GLTFLoader } from "https://esm.sh/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
+<script>
 
-/* ===================== */
-/* SETUP */
-/* ===================== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-const camera = new THREE.PerspectiveCamera(
-70,
-window.innerWidth/window.innerHeight,
-0.1,
-1000
-);
+/* ================= */
+/* LOAD SPRITES */
+/* ================= */
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
+const heroImg = new Image();
+heroImg.src = "https://i.imgur.com/5b6XQ5M.png"; // princess sprite
 
-/* LIGHT */
-const light = new THREE.DirectionalLight(0xffffff,1);
-light.position.set(10,20,10);
-light.castShadow = true;
-scene.add(light);
+const dragonImg = new Image();
+dragonImg.src = "https://i.imgur.com/7yUve0A.png"; // dragon sprite
 
-/* FLOOR */
-const floor = new THREE.Mesh(
-new THREE.PlaneGeometry(200,200),
-new THREE.MeshStandardMaterial({color:0x55aa55})
-);
-floor.rotation.x = -Math.PI/2;
-floor.receiveShadow = true;
-scene.add(floor);
+const bg = new Image();
+bg.src = "https://i.imgur.com/8pQYFqk.jpg"; // forest background
 
-camera.position.set(0,5,12);
+/* ================= */
+/* GAME VARIABLES */
+/* ================= */
 
-/* ===================== */
-/* LOAD MODELS */
-/* ===================== */
+let hero = {
+x:100,
+y:canvas.height-200,
+width:120,
+height:120,
+hp:100
+};
 
-const loader = new GLTFLoader();
+let dragon = {
+x:canvas.width-250,
+y:canvas.height-250,
+width:150,
+height:150,
+hp:100
+};
 
-let hero = null;
-let dragon = null;
+let keys = {};
+
+/* ================= */
+/* CONTROLS */
+/* ================= */
+
+canvas.addEventListener("touchmove",(e)=>{
+let touch = e.touches[0];
+hero.x = touch.clientX - hero.width/2;
+});
+
+document.getElementById("attackBtn")
+.addEventListener("touchstart",()=>{
+attack();
+});
+
+/* ================= */
+/* ATTACK FUNCTION */
+/* ================= */
+
+function attack(){
+let dx = hero.x - dragon.x;
+
+if(Math.abs(dx) < 150){
+dragon.hp -= 20;
+if(dragon.hp <= 0){
+dragon.hp = 0;
+setTimeout(()=>{
+showVictory();
+},500);
+}
+}
+}
+
+/* ================= */
+/* DRAW GAME */
+/* ================= */
+
+function draw(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ctx.drawImage(bg,0,0,canvas.width,canvas.height);
 
 /* HERO */
-loader.load("./hero.glb",(glb)=>{
-hero = glb.scene;
-hero.scale.set(1.5,1.5,1.5);
-hero.position.set(0,0,0);
-
-hero.traverse(child=>{
-if(child.isMesh) child.castShadow = true;
-});
-
-scene.add(hero);
-});
+ctx.drawImage(heroImg,hero.x,hero.y,hero.width,hero.height);
 
 /* DRAGON */
-loader.load("./dragon.glb",(glb)=>{
-dragon = glb.scene;
-dragon.scale.set(2,2,2);
-dragon.position.set(6,0,0);
-
-dragon.traverse(child=>{
-if(child.isMesh) child.castShadow = true;
-});
-
-scene.add(dragon);
-});
-
-/* ENV */
-loader.load("./environment.glb",(glb)=>{
-let env = glb.scene;
-env.scale.set(5,5,5);
-scene.add(env);
-});
-
-/* ===================== */
-/* CONTROLS */
-/* ===================== */
-
-let moveX = 0;
-let moveZ = 0;
-
-document.getElementById("joy")
-.addEventListener("touchmove",(e)=>{
-let touch = e.touches[0];
-moveX = (touch.clientX - window.innerWidth/2) * 0.001;
-moveZ = (touch.clientY - window.innerHeight/2) * 0.001;
-});
-
-document.getElementById("joy")
-.addEventListener("touchend",()=>{
-moveX = 0;
-moveZ = 0;
-});
-
-/* ATTACK */
-
-document.getElementById("attack")
-.addEventListener("touchstart",()=>{
-if(hero && dragon){
-let dist = hero.position.distanceTo(dragon.position);
-
-if(dist < 4){
-scene.remove(dragon);
-dragon = null;
-alert("🐉 Dragon Defeated!");
-}
-}
-});
-
-/* ===================== */
-/* LOOP */
-/* ===================== */
-
-function animate(){
-requestAnimationFrame(animate);
-
-if(hero){
-hero.position.x += moveX;
-hero.position.z += moveZ;
-
-camera.position.x = hero.position.x;
-camera.position.z = hero.position.z + 12;
-camera.lookAt(hero.position);
+if(dragon.hp > 0){
+ctx.drawImage(dragonImg,dragon.x,dragon.y,dragon.width,dragon.height);
 }
 
-renderer.render(scene,camera);
+/* HP BAR */
+document.getElementById("hpFill").style.width = dragon.hp + "%";
 }
 
-animate();
+/* ================= */
+/* GAME LOOP */
+/* ================= */
 
-/* RESIZE */
+function update(){
+draw();
+requestAnimationFrame(update);
+}
 
-window.addEventListener("resize",()=>{
-camera.aspect = window.innerWidth/window.innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth,window.innerHeight);
-});
+update();
+
+/* ================= */
+/* WIN SCREEN */
+/* ================= */
+
+function showVictory(){
+
+document.body.innerHTML = `
+<div style="color:white;text-align:center;margin-top:200px;">
+<h1>🐉 Dragon Defeated!</h1>
+<h2>Ismayanti Baizura ❤️</h2>
+<p>
+You saved your kingdom.<br>
+Happy Birthday My Warrior Queen.
+</p>
+</div>
+`;
+}
 
 </script>
 
