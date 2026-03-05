@@ -111,7 +111,11 @@ let score=0;
 let items=[];
 let speed=6;
 let roadOffset=0;
+
 let sparkles=[];
+let confetti=[];
+let fireworks=[];
+let celebration=false;
 
 /* AUDIO */
 const collectSound=new Audio("collect.mp3");
@@ -152,7 +156,7 @@ car.y=canvas.height-180;
 }
 updateCar();
 
-/* TOUCH CONTROL */
+/* TOUCH */
 window.addEventListener("touchstart",(e)=>{
 if(!running)return;
 let x=e.touches[0].clientX;
@@ -193,19 +197,24 @@ running=false;
 bgMusic.pause();
 winSound.play();
 
+celebration=true;
+createConfetti();
+createFirework();
+setInterval(createFirework,1200);
+
 overlay.style.display="flex";
 overlay.innerHTML=`
 <h1 style='color:#ff4757;'>Happy Birthday Sayang 🎂❤️</h1>
 <p style="margin-top:20px;max-width:500px;line-height:1.7;">
 From the first day sampai sekarang...<br><br>
 I tak pernah stop choosing you.<br><br>
-Dalam hidup ni maybe banyak jalan berliku,<br>
-kadang I drive slow, kadang you yang tarik I laju.<br><br>
-But one thing for sure...<br>
-I nak terus drive dengan you sampai tua nanti.<br><br>
-Thank you sebab jadi rumah I.<br>
-Thank you sebab jadi hati I.<br><br>
-I love you more than every ❤️ I collected just now.
+Dalam hidup ni mungkin banyak jalan berliku,
+kadang I penat, kadang you yang kuatkan I.<br><br>
+But I promise one thing...<br>
+I nak terus drive hidup ni dengan you sampai tua nanti.<br><br>
+You bukan sekadar cinta I.<br>
+You adalah rumah I. ❤️<br><br>
+Selamat hari lahir, my forever co-driver.
 </p>
 <button onclick="location.reload()">Play Again 🚗</button>
 `;
@@ -232,9 +241,39 @@ dy:(Math.random()-0.5)*4
 }
 }
 
+/* CONFETTI */
+function createConfetti(){
+for(let i=0;i<120;i++){
+confetti.push({
+x:Math.random()*canvas.width,
+y:Math.random()*-canvas.height,
+size:Math.random()*6+4,
+speed:Math.random()*3+2,
+color:`hsl(${Math.random()*360},100%,60%)`
+});
+}
+}
+
+/* FIREWORK */
+function createFirework(){
+let cx=Math.random()*canvas.width;
+let cy=Math.random()*canvas.height/2;
+
+for(let i=0;i<60;i++){
+fireworks.push({
+x:cx,
+y:cy,
+dx:(Math.random()-0.5)*8,
+dy:(Math.random()-0.5)*8,
+alpha:1,
+color:`hsl(${Math.random()*360},100%,60%)`
+});
+}
+}
+
 /* LOOP */
 function animate(){
-if(!running) return;
+if(!running && !celebration) return;
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
@@ -262,10 +301,10 @@ ctx.stroke();
 ctx.setLineDash([]);
 
 /* Car */
-ctx.drawImage(carImg,car.x,car.y,car.w,car.h);
+if(running) ctx.drawImage(carImg,car.x,car.y,car.w,car.h);
 
 /* Spawn */
-if(Math.random()<0.03) spawn();
+if(running && Math.random()<0.03) spawn();
 
 /* Items */
 for(let i=items.length-1;i>=0;i--){
@@ -277,14 +316,13 @@ ctx.font="40px Arial";
 ctx.textAlign="center";
 ctx.fillText(it.good?"❤️":"💢",x,it.y);
 
-if(it.y>car.y && it.y<car.y+car.h && it.lane===car.lane){
+if(running && it.y>car.y && it.y<car.y+car.h && it.lane===car.lane){
 if(it.good){
 score++;
 scoreEl.innerText=score;
 collectSound.currentTime=0;
 collectSound.play();
 createSparkle(car.x+car.w/2,car.y);
-
 if(score>=15) win();
 }else{
 hitSound.currentTime=0;
@@ -296,7 +334,7 @@ items.splice(i,1);
 if(it.y>canvas.height) items.splice(i,1);
 }
 
-/* Draw Sparkles */
+/* Sparkles */
 for(let i=sparkles.length-1;i>=0;i--){
 let s=sparkles[i];
 s.x+=s.dx;
@@ -311,6 +349,34 @@ ctx.fill();
 ctx.globalAlpha=1;
 
 if(s.alpha<=0) sparkles.splice(i,1);
+}
+
+/* CONFETTI */
+if(celebration){
+for(let i=confetti.length-1;i>=0;i--){
+let c=confetti[i];
+c.y+=c.speed;
+ctx.fillStyle=c.color;
+ctx.fillRect(c.x,c.y,c.size,c.size);
+if(c.y>canvas.height) confetti.splice(i,1);
+}
+
+/* FIREWORKS */
+for(let i=fireworks.length-1;i>=0;i--){
+let f=fireworks[i];
+f.x+=f.dx;
+f.y+=f.dy;
+f.alpha-=0.02;
+
+ctx.globalAlpha=f.alpha;
+ctx.fillStyle=f.color;
+ctx.beginPath();
+ctx.arc(f.x,f.y,2,0,Math.PI*2);
+ctx.fill();
+ctx.globalAlpha=1;
+
+if(f.alpha<=0) fireworks.splice(i,1);
+}
 }
 
 requestAnimationFrame(animate);
