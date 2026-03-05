@@ -81,16 +81,10 @@ z-index:5;
 
 <p>
 In Our Life...<br><br>
-Banyak jalan kita dah tempuh sama-sama.<br>
-Ada corner tajam.<br>
-Ada stuck in bad traffic.<br><br>
-Tapi satu benda tak pernah berubah...<br><br>
-I tetap pilih you to be with me in any situation. ❤️
+I tetap pilih you.
 </p>
 
-<button id="startBtn">
-Start 🚗❤️
-</button>
+<button id="startBtn">Start 🚗❤️</button>
 </div>
 
 <canvas id="game"></canvas>
@@ -161,7 +155,6 @@ updateCar();
 window.addEventListener("touchstart",(e)=>{
 if(!running)return;
 let x=e.touches[0].clientX;
-
 if(x<canvas.width/2 && car.lane>0) car.lane--;
 if(x>canvas.width/2 && car.lane<2) car.lane++;
 updateCar();
@@ -169,19 +162,11 @@ updateCar();
 
 window.addEventListener("keydown",(e)=>{
 if(!running) return;
-
 if(e.key==="ArrowLeft" || e.key==="a"){
-if(car.lane>0){
-car.lane--;
-updateCar();
+if(car.lane>0){car.lane--;updateCar();}
 }
-}
-
 if(e.key==="ArrowRight" || e.key==="d"){
-if(car.lane<2){
-car.lane++;
-updateCar();
-}
+if(car.lane<2){car.lane++;updateCar();}
 }
 });
 
@@ -190,8 +175,7 @@ updateCar();
 function createSparkle(x,y){
 for(let i=0;i<10;i++){
 sparkles.push({
-x,
-y,
+x,y,
 dx:(Math.random()-0.5)*5,
 dy:(Math.random()-0.5)*5,
 alpha:1
@@ -200,16 +184,9 @@ alpha:1
 }
 
 function createFloatingText(x,y){
-let words=[
-"Good job ❤️",
-"Kuat sayang!",
-"Proud of you 😘",
-"Keep going!"
-];
-
+let words=["Good job ❤️","Kuat sayang!","Proud of you 😘","Keep going!"];
 floatingTexts.push({
-x,
-y,
+x,y,
 text:words[Math.floor(Math.random()*words.length)],
 alpha:1
 });
@@ -231,7 +208,6 @@ color:`hsl(${Math.random()*360},100%,60%)`
 function createFirework(){
 let cx=Math.random()*canvas.width;
 let cy=Math.random()*canvas.height/2;
-
 for(let i=0;i<70;i++){
 fireworks.push({
 x:cx,
@@ -268,23 +244,7 @@ createFirework();
 overlay.style.display="flex";
 overlay.innerHTML=`
 <h1 style='color:#ff4757;'>Happy Birthday Sayang 🎂❤️</h1>
-
-<p style="margin-top:20px;max-width:500px;line-height:1.7;">
-From the first day sampai sekarang...<br><br>
-
-I tak pernah stop choosing you.<br><br>
-
-Dalam hidup ni mungkin banyak jalan berliku,
-kadang I jatuh, kadang you yang bangunkan I.<br><br>
-
-But I promise you this...<br>
-I nak terus drive hidup ni dengan you sampai tua nanti.<br><br>
-
-You're not just my LOVE.<br>
-You're my HOME my LIFE. ❤️<br><br>
-
-Selamat hari lahir, my forever co-driver.
-</p>
+<p>You're my HOME my LIFE ❤️</p>
 <button onclick="location.reload()">Play Again 🚗</button>
 `;
 
@@ -294,7 +254,6 @@ celebrationLoop();
 /* ================= GAME LOOP ================= */
 
 function gameLoop(){
-
 if(!running) return;
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -313,7 +272,6 @@ roadOffset+=6;
 ctx.strokeStyle="rgba(255,255,255,.2)";
 ctx.setLineDash([30,40]);
 ctx.lineDashOffset=-roadOffset;
-
 ctx.beginPath();
 ctx.moveTo(laneW,0);
 ctx.lineTo(laneW,canvas.height);
@@ -332,7 +290,6 @@ if(Math.random()<0.03) spawn();
 for(let i=items.length-1;i>=0;i--){
 let it=items[i];
 it.y+=6;
-
 let x=(it.lane*(canvas.width/3))+(canvas.width/6);
 
 ctx.font="40px Arial";
@@ -347,7 +304,7 @@ scoreEl.innerText=score;
 collectSound.currentTime=0;
 collectSound.play();
 
-/* 🔥 EFFECTS ON COLLECT */
+/* EFFECT TRIGGER */
 createSparkle(car.x+car.w/2,car.y);
 createFloatingText(car.x+car.w/2,car.y-20);
 
@@ -360,8 +317,36 @@ hitSound.play();
 
 items.splice(i,1);
 }
-
 if(it.y>canvas.height) items.splice(i,1);
+}
+
+/* RENDER SPARKLES */
+for(let i=sparkles.length-1;i>=0;i--){
+let s=sparkles[i];
+s.x+=s.dx;
+s.y+=s.dy;
+s.alpha-=0.03;
+ctx.globalAlpha=s.alpha;
+ctx.fillStyle="#ff4757";
+ctx.beginPath();
+ctx.arc(s.x,s.y,3,0,Math.PI*2);
+ctx.fill();
+ctx.globalAlpha=1;
+if(s.alpha<=0) sparkles.splice(i,1);
+}
+
+/* RENDER FLOATING TEXT */
+for(let i=floatingTexts.length-1;i>=0;i--){
+let ft=floatingTexts[i];
+ft.y-=1.5;
+ft.alpha-=0.02;
+ctx.globalAlpha=ft.alpha;
+ctx.fillStyle="#ff4757";
+ctx.font="bold 18px Segoe UI";
+ctx.textAlign="center";
+ctx.fillText(ft.text,ft.x,ft.y);
+ctx.globalAlpha=1;
+if(ft.alpha<=0) floatingTexts.splice(i,1);
 }
 
 requestAnimationFrame(gameLoop);
@@ -370,7 +355,6 @@ requestAnimationFrame(gameLoop);
 /* ================= CELEBRATION ================= */
 
 function celebrationLoop(){
-
 if(!celebrating) return;
 
 cctx.clearRect(0,0,ccanvas.width,ccanvas.height);
