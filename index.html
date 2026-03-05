@@ -24,6 +24,7 @@ left:15px;
 font-weight:bold;
 color:#ff4757;
 z-index:2;
+font-size:14px;
 }
 
 #scoreUI{
@@ -31,7 +32,7 @@ position:absolute;
 top:20px;
 width:100%;
 text-align:center;
-font-size:32px;
+font-size:26px;
 font-weight:900;
 text-shadow:0 0 10px #ff4757;
 z-index:2;
@@ -52,13 +53,13 @@ padding:30px;
 }
 
 button{
-padding:18px 40px;
-font-size:20px;
+padding:16px 36px;
+font-size:18px;
 border:none;
 border-radius:40px;
 background:#ff4757;
 color:white;
-margin-top:30px;
+margin-top:25px;
 }
 
 #countdown{
@@ -79,7 +80,7 @@ margin-top:20px;
 
 <p id="introText" style="max-width:500px;margin-top:20px;line-height:1.6;opacity:0;transition:1.5s;">
 Dalam hidup ni...<br><br>
-Banyak jalan kita dah tempuh bersama.<br>
+Banyak jalan kita dah tempuh sama-sama.<br>
 Ada selekoh tajam.<br>
 Ada jalan jem.<br><br>
 Tapi satu benda tak pernah berubah...<br><br>
@@ -109,6 +110,8 @@ let running=false;
 let score=0;
 let items=[];
 let speed=6;
+let roadOffset=0;
+let sparkles=[];
 
 /* AUDIO */
 const collectSound=new Audio("collect.mp3");
@@ -125,12 +128,8 @@ a.play().then(()=>a.pause()).catch(()=>{});
 }
 
 /* INTRO */
-function romanticIntro(){
 setTimeout(()=>{ introText.style.opacity=1; },800);
 setTimeout(()=>{ startBtn.style.display="inline-block"; },3000);
-}
-
-romanticIntro();
 
 /* RESIZE */
 function resize(){
@@ -153,7 +152,7 @@ car.y=canvas.height-180;
 }
 updateCar();
 
-/* TOUCH */
+/* TOUCH CONTROL */
 window.addEventListener("touchstart",(e)=>{
 if(!running)return;
 let x=e.touches[0].clientX;
@@ -193,8 +192,23 @@ function win(){
 running=false;
 bgMusic.pause();
 winSound.play();
+
 overlay.style.display="flex";
-overlay.innerHTML="<h1 style='color:#ff4757;'>SELAMAT HARI LAHIR ISMAYANTI BAIZURA 🎂</h1><p>You're Still The One ❤️</p>";
+overlay.innerHTML=`
+<h1 style='color:#ff4757;'>Happy Birthday Sayang 🎂❤️</h1>
+<p style="margin-top:20px;max-width:500px;line-height:1.7;">
+From the first day sampai sekarang...<br><br>
+I tak pernah stop choosing you.<br><br>
+Dalam hidup ni maybe banyak jalan berliku,<br>
+kadang I drive slow, kadang you yang tarik I laju.<br><br>
+But one thing for sure...<br>
+I nak terus drive dengan you sampai tua nanti.<br><br>
+Thank you sebab jadi rumah I.<br>
+Thank you sebab jadi hati I.<br><br>
+I love you more than every ❤️ I collected just now.
+</p>
+<button onclick="location.reload()">Play Again 🚗</button>
+`;
 }
 
 /* SPAWN */
@@ -202,6 +216,20 @@ function spawn(){
 let lane=Math.floor(Math.random()*3);
 let good=Math.random()>0.4;
 items.push({lane:lane,y:-50,good:good});
+}
+
+/* SPARKLE */
+function createSparkle(x,y){
+for(let i=0;i<8;i++){
+sparkles.push({
+x:x,
+y:y,
+radius:Math.random()*4+2,
+alpha:1,
+dx:(Math.random()-0.5)*4,
+dy:(Math.random()-0.5)*4
+});
+}
 }
 
 /* LOOP */
@@ -219,8 +247,12 @@ ctx.fillRect(0,0,canvas.width,canvas.height);
 
 /* Road */
 let laneW=canvas.width/3;
-ctx.strokeStyle="rgba(255,255,255,.15)";
+roadOffset+=speed;
+
+ctx.strokeStyle="rgba(255,255,255,.2)";
 ctx.setLineDash([30,40]);
+ctx.lineDashOffset=-roadOffset;
+
 ctx.beginPath();
 ctx.moveTo(laneW,0);
 ctx.lineTo(laneW,canvas.height);
@@ -251,6 +283,8 @@ score++;
 scoreEl.innerText=score;
 collectSound.currentTime=0;
 collectSound.play();
+createSparkle(car.x+car.w/2,car.y);
+
 if(score>=15) win();
 }else{
 hitSound.currentTime=0;
@@ -260,6 +294,23 @@ items.splice(i,1);
 }
 
 if(it.y>canvas.height) items.splice(i,1);
+}
+
+/* Draw Sparkles */
+for(let i=sparkles.length-1;i>=0;i--){
+let s=sparkles[i];
+s.x+=s.dx;
+s.y+=s.dy;
+s.alpha-=0.03;
+
+ctx.globalAlpha=s.alpha;
+ctx.fillStyle="#ff4757";
+ctx.beginPath();
+ctx.arc(s.x,s.y,s.radius,0,Math.PI*2);
+ctx.fill();
+ctx.globalAlpha=1;
+
+if(s.alpha<=0) sparkles.splice(i,1);
 }
 
 requestAnimationFrame(animate);
