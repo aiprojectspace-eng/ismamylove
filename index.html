@@ -68,6 +68,14 @@ font-weight:900;
 color:#ff4757;
 margin-top:20px;
 }
+
+#celebration{
+position:absolute;
+top:0;
+left:0;
+pointer-events:none;
+z-index:5;
+}
 </style>
 </head>
 <body>
@@ -78,7 +86,7 @@ margin-top:20px;
 <div id="overlay">
 <h1 style="color:#ff4757;">Ismayanti Baizura ❤️</h1>
 
-<p id="introText" style="max-width:500px;margin-top:20px;line-height:1.6;opacity:0;transition:1.5s;">
+<p style="max-width:500px;margin-top:20px;line-height:1.6;">
 In Our Life...<br><br>
 Banyak jalan kita dah tempuh sama-sama.<br>
 Ada corner tajam.<br>
@@ -87,7 +95,7 @@ Tapi satu benda tak pernah berubah...<br><br>
 I tetap pilih you to be with me in any situation. ❤️
 </p>
 
-<button id="startBtn" style="display:none;">
+<button id="startBtn">
 Start Our Journey 🚗❤️
 </button>
 
@@ -95,56 +103,54 @@ Start Our Journey 🚗❤️
 </div>
 
 <canvas id="game"></canvas>
+<canvas id="celebration"></canvas>
 
 <script>
+
+/* ================= CORE ================= */
+
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
 
+const ccanvas=document.getElementById("celebration");
+const cctx=ccanvas.getContext("2d");
+
 const overlay=document.getElementById("overlay");
-const introText=document.getElementById("introText");
 const startBtn=document.getElementById("startBtn");
-const countdownEl=document.getElementById("countdown");
 const scoreEl=document.getElementById("score");
+const countdownEl=document.getElementById("countdown");
 
 let running=false;
 let celebrating=false;
 let score=0;
 let items=[];
-let speed=6;
-let roadOffset=0;
-
-let sparkles=[];
-let floatingTexts=[];
 let confetti=[];
 let fireworks=[];
+let roadOffset=0;
 
-/* AUDIO */
+/* ================= AUDIO ================= */
+
 const collectSound=new Audio("collect.mp3");
 const hitSound=new Audio("hit.mp3");
 const winSound=new Audio("win.mp3");
 const bgMusic=new Audio("bgmusic.mp3");
+
 bgMusic.loop=true;
 bgMusic.volume=0.4;
 
-function unlockAudio(){
-[collectSound,hitSound,winSound,bgMusic].forEach(a=>{
-a.play().then(()=>a.pause()).catch(()=>{});
-});
-}
+/* ================= RESIZE ================= */
 
-/* INTRO */
-setTimeout(()=>{ introText.style.opacity=1; },800);
-setTimeout(()=>{ startBtn.style.display="inline-block"; },3000);
-
-/* RESIZE */
 function resize(){
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
+ccanvas.width=window.innerWidth;
+ccanvas.height=window.innerHeight;
 }
 window.addEventListener("resize",resize);
 resize();
 
-/* CAR */
+/* ================= CAR ================= */
+
 const carImg=new Image();
 carImg.src="saga_blm.png";
 
@@ -157,41 +163,98 @@ car.y=canvas.height-180;
 }
 updateCar();
 
-/* TOUCH */
+/* ================= TOUCH ================= */
+
 window.addEventListener("touchstart",(e)=>{
 if(!running)return;
 let x=e.touches[0].clientX;
-if(x<canvas.width/2 && car.lane>0) car.lane--;
-if(x>canvas.width/2 && car.lane<2) car.lane++;
+
+if(x<canvas.width/2 && car.lane>0){
+car.lane--;
+}
+
+if(x>canvas.width/2 && car.lane<2){
+car.lane++;
+}
+
 updateCar();
 });
 
-/* START */
+/* ================= KEYBOARD CONTROL ================= */
+
+window.addEventListener("keydown",(e)=>{
+if(!running) return;
+
+if(e.key==="ArrowLeft" || e.key==="a" || e.key==="A"){
+if(car.lane>0){
+car.lane--;
+updateCar();
+}
+}
+
+if(e.key==="ArrowRight" || e.key==="d" || e.key==="D"){
+if(car.lane<2){
+car.lane++;
+updateCar();
+}
+}
+});
+
+/* ================= START ================= */
+
 startBtn.onclick=()=>{
-unlockAudio();
-startBtn.style.display="none";
-introText.style.display="none";
-startCountdown();
-};
-
-function startCountdown(){
-let c=3;
-countdownEl.innerText=c;
-
-let timer=setInterval(()=>{
-c--;
-countdownEl.innerText=c;
-if(c<=0){
-clearInterval(timer);
 overlay.style.display="none";
 bgMusic.play();
 running=true;
 gameLoop();
-}
-},1000);
+};
+
+/* ================= SPAWN ================= */
+
+function spawn(){
+items.push({
+lane:Math.floor(Math.random()*3),
+y:-50,
+good:Math.random()>0.4
+});
 }
 
-/* WIN */
+/* ================= CONFETTI ================= */
+
+function createConfetti(){
+confetti.length=0;
+
+for(let i=0;i<200;i++){
+confetti.push({
+x:Math.random()*canvas.width,
+y:Math.random()*-canvas.height,
+size:4+Math.random()*4,
+speed:2+Math.random()*3,
+color:`hsl(${Math.random()*360},100%,60%)`
+});
+}
+}
+
+/* ================= FIREWORK ================= */
+
+function createFirework(){
+let cx=Math.random()*canvas.width;
+let cy=Math.random()*canvas.height/2;
+
+for(let i=0;i<80;i++){
+fireworks.push({
+x:cx,
+y:cy,
+dx:(Math.random()-0.5)*10,
+dy:(Math.random()-0.5)*10,
+alpha:1,
+color:`hsl(${Math.random()*360},100%,60%)`
+});
+}
+}
+
+/* ================= WIN ================= */
+
 function win(){
 running=false;
 celebrating=true;
@@ -202,223 +265,156 @@ createConfetti();
 createFirework();
 
 overlay.style.display="flex";
+
 overlay.innerHTML=`
 <h1 style='color:#ff4757;'>Happy Birthday Sayang 🎂❤️</h1>
+
 <p style="margin-top:20px;max-width:500px;line-height:1.7;">
 From the first day sampai sekarang...<br><br>
+
 I tak pernah stop choosing you.<br><br>
+
 Dalam hidup ni mungkin banyak jalan berliku,
 kadang I jatuh, kadang you yang bangunkan I.<br><br>
+
 But I promise you this...<br>
 I nak terus drive hidup ni dengan you sampai tua nanti.<br><br>
+
 You're not just my LOVE.<br>
 You're my HOME my LIFE. ❤️<br><br>
+
 Selamat hari lahir, my forever co-driver.
 </p>
+
 <button onclick="location.reload()">Play Again 🚗</button>
 `;
 
 celebrationLoop();
 }
 
-/* SPAWN */
-function spawn(){
-let lane=Math.floor(Math.random()*3);
-let good=Math.random()>0.4;
-items.push({lane:lane,y:-50,good:good});
-}
+/* ================= GAME LOOP ================= */
 
-/* SPARKLE */
-function createSparkle(x,y){
-for(let i=0;i<8;i++){
-sparkles.push({
-x:x,
-y:y,
-dx:(Math.random()-0.5)*4,
-dy:(Math.random()-0.5)*4,
-alpha:1
-});
-}
-}
-
-/* FLOATING TEXT */
-function createFloatingText(x,y){
-const messages=[
-"Good job sayang ❤️",
-"Kuat Racing Ni!",
-"That’s my girl 😘",
-"Cekci Montot!",
-"Proud of you Yayam ❤️"
-];
-
-floatingTexts.push({
-x:x,
-y:y,
-text:messages[Math.floor(Math.random()*messages.length)],
-alpha:1
-});
-}
-
-/* CONFETTI */
-function createConfetti(){
-for(let i=0;i<150;i++){
-confetti.push({
-x:Math.random()*canvas.width,
-y:Math.random()*-canvas.height,
-size:Math.random()*6+4,
-speed:Math.random()*3+2,
-color:`hsl(${Math.random()*360},100%,60%)`
-});
-}
-}
-
-/* FIREWORK */
-function createFirework(){
-let cx=Math.random()*canvas.width;
-let cy=Math.random()*canvas.height/2;
-for(let i=0;i<60;i++){
-fireworks.push({
-x:cx,
-y:cy,
-dx:(Math.random()-0.5)*8,
-dy:(Math.random()-0.5)*8,
-alpha:1,
-color:`hsl(${Math.random()*360},100%,60%)`
-});
-}
-}
-
-/* GAME LOOP */
 function gameLoop(){
+
 if(!running) return;
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
+/* BACKGROUND */
 let grad=ctx.createLinearGradient(0,0,0,canvas.height);
 grad.addColorStop(0,"#0f0f0f");
 grad.addColorStop(1,"#1f1f1f");
 ctx.fillStyle=grad;
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
+/* ROAD */
 let laneW=canvas.width/3;
-roadOffset+=speed;
+roadOffset+=6;
 
 ctx.strokeStyle="rgba(255,255,255,.2)";
 ctx.setLineDash([30,40]);
 ctx.lineDashOffset=-roadOffset;
+
 ctx.beginPath();
 ctx.moveTo(laneW,0);
 ctx.lineTo(laneW,canvas.height);
 ctx.moveTo(laneW*2,0);
 ctx.lineTo(laneW*2,canvas.height);
 ctx.stroke();
+
 ctx.setLineDash([]);
 
+/* CAR */
 ctx.drawImage(carImg,car.x,car.y,car.w,car.h);
 
+/* SPAWN */
 if(Math.random()<0.03) spawn();
 
+/* ITEMS */
 for(let i=items.length-1;i>=0;i--){
 let it=items[i];
-it.y+=speed;
+it.y+=6;
+
 let x=(it.lane*(canvas.width/3))+(canvas.width/6);
+
 ctx.font="40px Arial";
 ctx.textAlign="center";
 ctx.fillText(it.good?"❤️":"💢",x,it.y);
 
 if(it.y>car.y && it.y<car.y+car.h && it.lane===car.lane){
+
 if(it.good){
 score++;
 scoreEl.innerText=score;
 collectSound.currentTime=0;
 collectSound.play();
-createSparkle(car.x+car.w/2,car.y);
-createFloatingText(car.x+car.w/2,car.y-20);
+
 if(score>=15) win();
-}else{
+}
+else{
 hitSound.currentTime=0;
 hitSound.play();
 }
+
 items.splice(i,1);
 }
-if(it.y>canvas.height) items.splice(i,1);
-}
 
-/* SPARKLES */
-for(let i=sparkles.length-1;i>=0;i--){
-let s=sparkles[i];
-s.x+=s.dx;
-s.y+=s.dy;
-s.alpha-=0.03;
-ctx.globalAlpha=s.alpha;
-ctx.fillStyle="#ff4757";
-ctx.beginPath();
-ctx.arc(s.x,s.y,3,0,Math.PI*2);
-ctx.fill();
-ctx.globalAlpha=1;
-if(s.alpha<=0) sparkles.splice(i,1);
+if(it.y>canvas.height){
+items.splice(i,1);
 }
-
-/* FLOATING TEXT */
-for(let i=floatingTexts.length-1;i>=0;i--){
-let ft=floatingTexts[i];
-ft.y-=1.5;
-ft.alpha-=0.02;
-ctx.globalAlpha=ft.alpha;
-ctx.fillStyle="#ff4757";
-ctx.font="bold 18px Segoe UI";
-ctx.textAlign="center";
-ctx.fillText(ft.text,ft.x,ft.y);
-ctx.globalAlpha=1;
-if(ft.alpha<=0) floatingTexts.splice(i,1);
 }
 
 requestAnimationFrame(gameLoop);
 }
 
-/* CELEBRATION LOOP */
+/* ================= CELEBRATION ================= */
+
 function celebrationLoop(){
+
 if(!celebrating) return;
 
-ctx.clearRect(0,0,canvas.width,canvas.height);
-
-let grad=ctx.createLinearGradient(0,0,0,canvas.height);
-grad.addColorStop(0,"#0f0f0f");
-grad.addColorStop(1,"#1f1f1f");
-ctx.fillStyle=grad;
-ctx.fillRect(0,0,canvas.width,canvas.height);
+cctx.clearRect(0,0,ccanvas.width,ccanvas.height);
 
 /* CONFETTI */
 for(let i=confetti.length-1;i>=0;i--){
 let c=confetti[i];
 c.y+=c.speed;
-ctx.fillStyle=c.color;
-ctx.fillRect(c.x,c.y,c.size,c.size);
-if(c.y>canvas.height) confetti.splice(i,1);
+
+cctx.fillStyle=c.color;
+cctx.fillRect(c.x,c.y,c.size,c.size);
+
+if(c.y>ccanvas.height){
+confetti.splice(i,1);
+}
 }
 
-/* FIREWORKS */
+/* FIREWORK */
 for(let i=fireworks.length-1;i>=0;i--){
 let f=fireworks[i];
+
 f.x+=f.dx;
 f.y+=f.dy;
 f.alpha-=0.02;
-ctx.globalAlpha=f.alpha;
-ctx.fillStyle=f.color;
-ctx.beginPath();
-ctx.arc(f.x,f.y,2,0,Math.PI*2);
-ctx.fill();
-ctx.globalAlpha=1;
-if(f.alpha<=0) fireworks.splice(i,1);
+
+cctx.globalAlpha=f.alpha;
+cctx.fillStyle=f.color;
+cctx.beginPath();
+cctx.arc(f.x,f.y,2,0,Math.PI*2);
+cctx.fill();
+cctx.globalAlpha=1;
+
+if(f.alpha<=0){
+fireworks.splice(i,1);
+}
 }
 
-if(Math.random()<0.04){
+if(Math.random()<0.05){
 createFirework();
 }
 
 requestAnimationFrame(celebrationLoop);
 }
+
 </script>
 </body>
 </html>
-
