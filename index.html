@@ -62,13 +62,6 @@ color:white;
 margin-top:25px;
 }
 
-#countdown{
-font-size:60px;
-font-weight:900;
-color:#ff4757;
-margin-top:20px;
-}
-
 #celebration{
 position:absolute;
 top:0;
@@ -86,7 +79,7 @@ z-index:5;
 <div id="overlay">
 <h1 style="color:#ff4757;">Ismayanti Baizura ❤️</h1>
 
-<p style="max-width:500px;margin-top:20px;line-height:1.6;">
+<p>
 In Our Life...<br><br>
 Banyak jalan kita dah tempuh sama-sama.<br>
 Ada corner tajam.<br>
@@ -96,10 +89,8 @@ I tetap pilih you to be with me in any situation. ❤️
 </p>
 
 <button id="startBtn">
-Start Our Journey 🚗❤️
+Start 🚗❤️
 </button>
-
-<div id="countdown"></div>
 </div>
 
 <canvas id="game"></canvas>
@@ -118,12 +109,14 @@ const cctx=ccanvas.getContext("2d");
 const overlay=document.getElementById("overlay");
 const startBtn=document.getElementById("startBtn");
 const scoreEl=document.getElementById("score");
-const countdownEl=document.getElementById("countdown");
 
 let running=false;
 let celebrating=false;
 let score=0;
+
 let items=[];
+let sparkles=[];
+let floatingTexts=[];
 let confetti=[];
 let fireworks=[];
 let roadOffset=0;
@@ -163,36 +156,28 @@ car.y=canvas.height-180;
 }
 updateCar();
 
-/* ================= TOUCH ================= */
+/* ================= TOUCH + KEY ================= */
 
 window.addEventListener("touchstart",(e)=>{
 if(!running)return;
 let x=e.touches[0].clientX;
 
-if(x<canvas.width/2 && car.lane>0){
-car.lane--;
-}
-
-if(x>canvas.width/2 && car.lane<2){
-car.lane++;
-}
-
+if(x<canvas.width/2 && car.lane>0) car.lane--;
+if(x>canvas.width/2 && car.lane<2) car.lane++;
 updateCar();
 });
-
-/* ================= KEYBOARD CONTROL ================= */
 
 window.addEventListener("keydown",(e)=>{
 if(!running) return;
 
-if(e.key==="ArrowLeft" || e.key==="a" || e.key==="A"){
+if(e.key==="ArrowLeft" || e.key==="a"){
 if(car.lane>0){
 car.lane--;
 updateCar();
 }
 }
 
-if(e.key==="ArrowRight" || e.key==="d" || e.key==="D"){
+if(e.key==="ArrowRight" || e.key==="d"){
 if(car.lane<2){
 car.lane++;
 updateCar();
@@ -200,31 +185,39 @@ updateCar();
 }
 });
 
-/* ================= START ================= */
+/* ================= EFFECTS ================= */
 
-startBtn.onclick=()=>{
-overlay.style.display="none";
-bgMusic.play();
-running=true;
-gameLoop();
-};
+function createSparkle(x,y){
+for(let i=0;i<10;i++){
+sparkles.push({
+x,
+y,
+dx:(Math.random()-0.5)*5,
+dy:(Math.random()-0.5)*5,
+alpha:1
+});
+}
+}
 
-/* ================= SPAWN ================= */
+function createFloatingText(x,y){
+let words=[
+"Good job ❤️",
+"Kuat sayang!",
+"Proud of you 😘",
+"Keep going!"
+];
 
-function spawn(){
-items.push({
-lane:Math.floor(Math.random()*3),
-y:-50,
-good:Math.random()>0.4
+floatingTexts.push({
+x,
+y,
+text:words[Math.floor(Math.random()*words.length)],
+alpha:1
 });
 }
 
-/* ================= CONFETTI ================= */
-
 function createConfetti(){
 confetti.length=0;
-
-for(let i=0;i<200;i++){
+for(let i=0;i<150;i++){
 confetti.push({
 x:Math.random()*canvas.width,
 y:Math.random()*-canvas.height,
@@ -235,22 +228,30 @@ color:`hsl(${Math.random()*360},100%,60%)`
 }
 }
 
-/* ================= FIREWORK ================= */
-
 function createFirework(){
 let cx=Math.random()*canvas.width;
 let cy=Math.random()*canvas.height/2;
 
-for(let i=0;i<80;i++){
+for(let i=0;i<70;i++){
 fireworks.push({
 x:cx,
 y:cy,
-dx:(Math.random()-0.5)*10,
-dy:(Math.random()-0.5)*10,
+dx:(Math.random()-0.5)*9,
+dy:(Math.random()-0.5)*9,
 alpha:1,
 color:`hsl(${Math.random()*360},100%,60%)`
 });
 }
+}
+
+/* ================= SPAWN ================= */
+
+function spawn(){
+items.push({
+lane:Math.floor(Math.random()*3),
+y:-50,
+good:Math.random()>0.4
+});
 }
 
 /* ================= WIN ================= */
@@ -265,7 +266,6 @@ createConfetti();
 createFirework();
 
 overlay.style.display="flex";
-
 overlay.innerHTML=`
 <h1 style='color:#ff4757;'>Happy Birthday Sayang 🎂❤️</h1>
 
@@ -285,7 +285,6 @@ You're my HOME my LIFE. ❤️<br><br>
 
 Selamat hari lahir, my forever co-driver.
 </p>
-
 <button onclick="location.reload()">Play Again 🚗</button>
 `;
 
@@ -300,14 +299,14 @@ if(!running) return;
 
 ctx.clearRect(0,0,canvas.width,canvas.height);
 
-/* BACKGROUND */
+/* Background */
 let grad=ctx.createLinearGradient(0,0,0,canvas.height);
 grad.addColorStop(0,"#0f0f0f");
 grad.addColorStop(1,"#1f1f1f");
 ctx.fillStyle=grad;
 ctx.fillRect(0,0,canvas.width,canvas.height);
 
-/* ROAD */
+/* Road */
 let laneW=canvas.width/3;
 roadOffset+=6;
 
@@ -321,16 +320,15 @@ ctx.lineTo(laneW,canvas.height);
 ctx.moveTo(laneW*2,0);
 ctx.lineTo(laneW*2,canvas.height);
 ctx.stroke();
-
 ctx.setLineDash([]);
 
-/* CAR */
+/* Car */
 ctx.drawImage(carImg,car.x,car.y,car.w,car.h);
 
-/* SPAWN */
+/* Spawn */
 if(Math.random()<0.03) spawn();
 
-/* ITEMS */
+/* Items */
 for(let i=items.length-1;i>=0;i--){
 let it=items[i];
 it.y+=6;
@@ -349,6 +347,10 @@ scoreEl.innerText=score;
 collectSound.currentTime=0;
 collectSound.play();
 
+/* 🔥 EFFECTS ON COLLECT */
+createSparkle(car.x+car.w/2,car.y);
+createFloatingText(car.x+car.w/2,car.y-20);
+
 if(score>=15) win();
 }
 else{
@@ -359,9 +361,7 @@ hitSound.play();
 items.splice(i,1);
 }
 
-if(it.y>canvas.height){
-items.splice(i,1);
-}
+if(it.y>canvas.height) items.splice(i,1);
 }
 
 requestAnimationFrame(gameLoop);
@@ -379,33 +379,24 @@ cctx.clearRect(0,0,ccanvas.width,ccanvas.height);
 for(let i=confetti.length-1;i>=0;i--){
 let c=confetti[i];
 c.y+=c.speed;
-
 cctx.fillStyle=c.color;
 cctx.fillRect(c.x,c.y,c.size,c.size);
-
-if(c.y>ccanvas.height){
-confetti.splice(i,1);
-}
+if(c.y>ccanvas.height) confetti.splice(i,1);
 }
 
 /* FIREWORK */
 for(let i=fireworks.length-1;i>=0;i--){
 let f=fireworks[i];
-
 f.x+=f.dx;
 f.y+=f.dy;
 f.alpha-=0.02;
-
 cctx.globalAlpha=f.alpha;
 cctx.fillStyle=f.color;
 cctx.beginPath();
 cctx.arc(f.x,f.y,2,0,Math.PI*2);
 cctx.fill();
 cctx.globalAlpha=1;
-
-if(f.alpha<=0){
-fireworks.splice(i,1);
-}
+if(f.alpha<=0) fireworks.splice(i,1);
 }
 
 if(Math.random()<0.05){
@@ -414,6 +405,15 @@ createFirework();
 
 requestAnimationFrame(celebrationLoop);
 }
+
+/* ================= START ================= */
+
+startBtn.onclick=()=>{
+overlay.style.display="none";
+bgMusic.play();
+running=true;
+gameLoop();
+};
 
 </script>
 </body>
